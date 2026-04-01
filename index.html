@@ -478,7 +478,7 @@
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
                         <!-- ACTIVITY CHART -->
                         <div class="card chart-card">
-                            <h3>Assiduité (Volume de devoirs par mois)</h3>
+                            <h3>Assiduité (Travail à la maison par mois)</h3>
                             <div class="chart-wrapper" style="height: 350px; position: relative;">
                                 <canvas id="activityChart"></canvas>
                             </div>
@@ -489,6 +489,16 @@
                             <h3>Radar des Compétences (Moyennes par matière)</h3>
                             <div class="chart-wrapper" style="height: 350px; position: relative;">
                                 <canvas id="radarChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MONTHLY AVERAGE CHART ROW -->
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 20px; margin-top: 20px;">
+                        <div class="card chart-card">
+                            <h3>Moyenne Mensuelle Globale (Pondérée)</h3>
+                            <div class="chart-wrapper" style="height: 350px; position: relative;">
+                                <canvas id="monthlyAverageChart"></canvas>
                             </div>
                         </div>
                     </div>

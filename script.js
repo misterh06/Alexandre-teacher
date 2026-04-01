@@ -988,7 +988,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const detectIsHome = (g) => {
             const subject = (g.matière || g.subject || g.Matière || g.Subject || "").toLowerCase();
             const comment = (g.commentaire || g.title || g.Commentaire || "").toLowerCase();
-            return subject.startsWith('home') || comment.startsWith('home');
+            return subject.startsWith('home') || comment.startsWith('[home]');
         };
 
         let filtered = currentGradesData;
@@ -1023,6 +1023,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let distributionChart = null;
     let activityChart = null;
     let radarChart = null;
+    let monthlyAverageChart = null;
 
     if (gradeForm) {
         gradeForm.addEventListener('submit', async (e) => {
@@ -1098,7 +1099,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Detection of Home vs School via prefix "home"
         const matiere = (data.matière || "").toLowerCase();
-        const isHome = matiere.startsWith('home') || fullComment.toLowerCase().startsWith('home');
+        const isHome = matiere.startsWith('home') || fullComment.toLowerCase().startsWith('[home]');
         const locationBadge = isHome
             ? '<span class="location-badge badge-home" title="Travail Maison"><i class="fa-solid fa-house"></i></span>'
             : '<span class="location-badge badge-school" title="Travail École"><i class="fa-solid fa-school"></i></span>';
@@ -1339,13 +1340,62 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateGradeDistributionChart(aboveAvg, belowAvg);
 
                 // --- UPDATE ACTIVITY CHART (Assiduité) ---
+                const targetSubjectBases = ['english', 'italien', 'math', 'french', 'physique'];
                 const monthlyActivity = {};
-                chartData.forEach(d => {
-                    // Trier par mois
-                    const monthKey = d.date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
-                    monthlyActivity[monthKey] = (monthlyActivity[monthKey] || 0) + 1;
+                
+                validGrades.forEach(g => {
+                    const subjectRaw = (g.matière || "").toLowerCase();
+                    const commentRaw = (g.commentaire || g.title || "").toLowerCase();
+                    const isHome = subjectRaw.startsWith('home') || commentRaw.startsWith('[home]');
+
+                    if (!isHome) return; // Ne compte que les travaux à la maison
+
+                    const baseSubject = getSubjectBase(subjectRaw); // Map ex: 'home - physique' -> 'physique'
+                    if (!targetSubjectBases.includes(baseSubject)) return; // On ignore les autres matières
+
+                    const dateObj = parseDate(g.date || g.timestamp);
+                    if (isNaN(dateObj.getTime())) return;
+
+                    const monthKey = dateObj.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+                    const formattedMonth = monthKey.charAt(0).toUpperCase() + monthKey.slice(1);
+                    
+                    if (!monthlyActivity[formattedMonth]) {
+                        monthlyActivity[formattedMonth] = { 'english': 0, 'italien': 0, 'math': 0, 'french': 0, 'physique': 0 };
+                    }
+                    
+                    monthlyActivity[formattedMonth][baseSubject] += 1;
                 });
+                
                 updateActivityChart(monthlyActivity);
+
+                // --- UPDATE MONTHLY AVERAGE CHART ---
+                const monthlyAverages = {};
+                validGrades.forEach(g => {
+                    // Check if it's a home work
+                    const subject = (g.matière || g.subject || g.Matière || "").toLowerCase();
+                    const comment = (g.commentaire || g.title || "").toLowerCase();
+                    const isHome = subject.startsWith('home') || comment.startsWith('[home]');
+                    
+                    if (isHome) return; // Skip home work
+
+                    const dateObj = parseDate(g.date || g.timestamp);
+                    if (isNaN(dateObj.getTime())) return;
+                    
+                    const monthKey = dateObj.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+                    const formattedMonth = monthKey.charAt(0).toUpperCase() + monthKey.slice(1);
+                    
+                    if (!monthlyAverages[formattedMonth]) {
+                        monthlyAverages[formattedMonth] = { sumWeighted: 0, sumCoef: 0 };
+                    }
+                    
+                    const scale = g.barème || 20;
+                    if (g.note !== null && g.note !== undefined) {
+                        const coef = g.coefficient || 1;
+                        monthlyAverages[formattedMonth].sumWeighted += ((g.note / scale) * 20) * coef;
+                        monthlyAverages[formattedMonth].sumCoef += coef;
+                    }
+                });
+                updateMonthlyAverageChart(monthlyAverages);
 
                 // --- UPDATE RADAR CHART (Équilibre des matières) ---
                 // --- UPDATE RADAR CHART ---
@@ -1499,7 +1549,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // 2. TABLE (Séparé Home/School) -> tableData
                 const comment = (g.commentaire || g.title || g.Commentaire || "").toLowerCase();
-                let isHome = matiere.toLowerCase().startsWith('home') || comment.startsWith('home');
+                let isHome = matiere.toLowerCase().startsWith('home') || comment.startsWith('[home]');
                 let aggKey = subjectKey; // Use same key logic
 
                 if (!tableData[aggKey]) {
@@ -1996,15 +2046,94 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!ctx) return;
         if (activityChart) activityChart.destroy();
 
+        const labels = Object.keys(monthlyData);
+        
+        const targetBases = ['english', 'italien', 'math', 'french', 'physique'];
+        const displayMaps = {
+            'english': { name: 'Anglais', color: 'rgba(255, 159, 67, 0.8)', border: '#ff9f43' },       // Orange
+            'italien': { name: 'Italien', color: 'rgba(46, 204, 113, 0.8)', border: '#2ecc71' },       // Vert
+            'math': { name: 'Mathématiques', color: 'rgba(243, 249, 29, 0.8)', border: '#f3f91d' },    // Jaune
+            'french': { name: 'Français', color: 'rgba(255, 77, 196, 0.8)', border: '#ff4dc4' },       // Rose
+            'physique': { name: 'Physique/Chimie', color: 'rgba(35, 219, 255, 0.8)', border: '#23dbff' } // Bleu clair
+        };
+
+        const datasets = targetBases.map(base => {
+            return {
+                label: displayMaps[base].name,
+                data: labels.map(month => monthlyData[month][base]),
+                backgroundColor: displayMaps[base].color,
+                borderColor: displayMaps[base].border,
+                borderWidth: 1
+            };
+        });
+
         activityChart = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: Object.keys(monthlyData),
+                labels: labels,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        stacked: true, // Empilé pour voir le volume total
+                        grid: { display: false },
+                        ticks: { color: 'rgba(255, 255, 255, 0.7)', font: { size: 10 } }
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true,
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        ticks: {
+                            color: 'rgba(255, 255, 255, 0.5)',
+                            stepSize: 1
+                        }
+                    }
+                },
+                plugins: {
+                    legend: { 
+                        display: true, 
+                        position: 'top',
+                        labels: { color: '#fff', font: { family: 'Poppins', size: 11 }, usePointStyle: true, boxWidth: 8 }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(18, 10, 36, 0.9)',
+                        titleFont: { family: 'Bangers' },
+                        bodyFont: { family: 'Poppins' },
+                        mode: 'index',
+                        intersect: false
+                    }
+                }
+            }
+        });
+    }
+
+    function updateMonthlyAverageChart(monthlyData) {
+        const ctx = document.getElementById('monthlyAverageChart');
+        if (!ctx) return;
+        if (monthlyAverageChart) monthlyAverageChart.destroy();
+
+        const labels = Object.keys(monthlyData);
+        const data = labels.map(month => {
+            const m = monthlyData[month];
+            return m.sumCoef > 0 ? (m.sumWeighted / m.sumCoef).toFixed(2) : 0;
+        });
+
+        const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, '#ae3eff'); // fn-purple
+        gradient.addColorStop(1, '#6c5ce7');
+
+        monthlyAverageChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
                 datasets: [{
-                    label: 'Nombre de devoirs',
-                    data: Object.values(monthlyData),
-                    backgroundColor: 'rgba(35, 219, 255, 0.6)',
-                    borderColor: '#23dbff',
+                    label: 'Moyenne Globale (/20)',
+                    data: data,
+                    backgroundColor: gradient,
+                    borderColor: '#ae3eff',
                     borderWidth: 2,
                     borderRadius: 8
                 }]
@@ -2015,23 +2144,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 scales: {
                     y: {
                         beginAtZero: true,
+                        max: 20,
                         grid: { color: 'rgba(255, 255, 255, 0.05)' },
                         ticks: {
                             color: 'rgba(255, 255, 255, 0.5)',
-                            stepSize: 1
+                            font: { family: 'Bangers' }
                         }
                     },
                     x: {
                         grid: { display: false },
-                        ticks: { color: 'rgba(255, 255, 255, 0.7)', font: { size: 10 } }
+                        ticks: { color: 'rgba(255, 255, 255, 0.7)', font: { family: 'Poppins' } }
                     }
                 },
                 plugins: {
-                    legend: { display: false },
+                    legend: {
+                        labels: { color: '#fff', font: { family: 'Bangers' } }
+                    },
                     tooltip: {
                         backgroundColor: 'rgba(18, 10, 36, 0.9)',
                         titleFont: { family: 'Bangers' },
-                        bodyFont: { family: 'Poppins' }
+                        bodyFont: { family: 'Poppins' },
+                        callbacks: {
+                            label: function(context) {
+                                return context.parsed.y + ' / 20';
+                            }
+                        }
                     }
                 }
             }
