@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alexandre Academy</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <!-- KaTeX for Math Formulas -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+        onload="console.log('KaTeX Loaded')"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- LEFT SIDEBAR -->
+        <nav class="sidebar-left">
+            <div class="logo">
+                <i class="fa-solid fa-graduation-cap"></i>
+                <span>Alexandre<br>Academy</span>
+            </div>
+
+            <ul class="nav-links">
+                <li class="nav-item active" data-target="dashboard">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Accueil</span>
+                </li>
+                <li class="nav-item" data-target="chat">
+                    <i class="fa-solid fa-robot"></i>
+                    <span>Le Professeur</span>
+                </li>
+                <li class="nav-item" data-target="grades">
+                    <i class="fa-solid fa-file-invoice"></i>
+                    <span>Carnet de notes</span>
+                </li>
+                <li class="nav-item" data-target="history">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span>Historique</span>
+                </li>
+                <li class="nav-item" data-target="achievements">
+                    <i class="fa-solid fa-trophy"></i>
+                    <span>Succès</span>
+                </li>
+            </ul>
+
+            <div class="user-profile">
+                <div class="avatar">A</div>
+                <div class="user-info">
+                    <span class="name">Alexandre</span>
+                    <span class="level">Niveau 6</span>
+                </div>
+            </div>
+        </nav>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <!-- HEADER -->
+            <header class="top-header">
+                <h2 id="page-title">Tableau de Bord</h2>
+                <div class="header-actions">
+                    <div class="search-bar">
+                        <i class="fa-solid fa-search"></i>
+                        <input type="text" placeholder="Rechercher une leçon...">
+                    </div>
+                    <button class="theme-btn" id="theme-toggle" title="Changer de thème">
+                        <i class="fa-solid fa-palette"></i>
+                    </button>
+                    <button class="notif-btn">
+                        <i class="fa-solid fa-bell"></i>
+                        <span class="badge">3</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- VIEWS -->
+
+            <!-- VIEW: DASHBOARD -->
+            <section id="dashboard" class="view active-view">
+                <div class="welcome-banner">
+                    <div class="welcome-text">
+                        <h1>Prêt pour l'aventure aujourd'hui, <span class="highlight">Alexandre</span> ?</h1>
+                        <p>Ton prochain défi t'attend en Mathématiques !</p>
+                        <button class="cta-btn" onclick="navigateTo('chat', 'Prêt pour les maths !')">Continuer
+                            l'aventure</button>
+                    </div>
+                    <div class="welcome-visual">
+                        <i class="fa-solid fa-rocket floating"></i>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="card recent-activity">
+                        <h3>Activité Récente</h3>
+                        <ul class="activity-list">
+                            <li>
+                                <div class="icon-box math"><i class="fa-solid fa-calculator"></i></div>
+                                <div class="details">
+                                    <span>Fractions simples</span>
+                                    <small>Il y a 2h</small>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="icon-box history"><i class="fa-solid fa-landmark"></i></div>
+                                <div class="details">
+                                    <span>L'Empire Romain</span>
+                                    <small>Hier</small>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="card daily-quest">
+                        <h3>Quête du Jour</h3>
+                        <div class="quest-content">
+                            <i class="fa-solid fa-scroll"></i>
+                            <p>Complète 3 exercices de conjugaison.</p>
+                            <div class="progress-bar">
+                                <div class="fill" style="width: 33%">1/3</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: CHAT (LE PROFESSEUR) -->
+            <section id="chat" class="view">
+                <div class="professor-layout">
+                    <!-- LEFT PANEL: FILE EXPLORER -->
+                    <aside class="files-panel">
+                        <div class="files-header">
+                            <h3><i class="fa-solid fa-folder-open"></i> Mes Leçons</h3>
+                            <select id="subject-select">
+                                <option value="" disabled selected>Sélectionner une matière</option>
+                                <option value="mathematiques">Mathématiques</option>
+                                <option value="francais">Français</option>
+                                <option value="svt">SVT</option>
+                                <option value="anglais">Anglais</option>
+                                <option value="histoire">Histoire</option>
+                                <option value="italien">Italien</option>
+                                <option value="physique">Physique/Chimie</option>
+                            </select>
+
+                            <div class="upload-section" style="margin: 15px 0;">
+                                <button id="upload-lesson-btn" class="upload-btn">
+                                    <i class="fa-solid fa-cloud-arrow-up"></i> Importer une leçon
+                                </button>
+                                <input type="file" id="lesson-file-input" accept="image/*" style="display: none;">
+                            </div>
+
+                            <div class="mode-selector-container" style="margin-top: 15px;">
+                                <label style="font-size: 0.8rem; opacity: 0.7; margin-bottom: 5px; display: block;">Mode
+                                    de travail :</label>
+                                <div class="mode-options" style="display: flex; gap: 5px;">
+                                    <input type="radio" name="work-mode" id="mode-revision" value="revision" checked
+                                        style="display: none;">
+                                    <label for="mode-revision" class="mode-btn">Révision</label>
+
+                                    <input type="radio" name="work-mode" id="mode-devoir" value="devoir"
+                                        style="display: none;">
+                                    <label for="mode-devoir" class="mode-btn">Devoir</label>
+
+                                    <input type="radio" name="work-mode" id="mode-lecon" value="lecon"
+                                        style="display: none;">
+                                    <label for="mode-lecon" class="mode-btn">Leçon</label>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div id="files-list" class="files-list">
+                            <div style="padding: 20px; text-align: center; opacity: 0.5; font-size: 0.9rem;">
+                                <i class="fa-solid fa-arrow-up"
+                                    style="display: block; margin-bottom: 10px; font-size: 1.2rem;"></i>
+                                Sélectionne une matière pour voir tes leçons
+                            </div>
+                        </div>
+                    </aside>
+
+                    <!-- RIGHT PANEL: CHAT AREA -->
+                    <div class="chat-main-area">
+                        <div class="chat-status-bar">
+                            <span class="status-label">Leçon active :</span>
+                            <span id="active-lesson-name" class="status-value">Aucune</span>
+                            <span class="session-timer" id="session-timer" style="display: none;">
+                                <i class="fa-solid fa-clock"></i>
+                                <span id="session-time">00:00</span>
+                                <button id="pause-timer-btn"
+                                    style="background:none; border:none; color:inherit; cursor:pointer; margin-left:5px; padding:0; display:flex; align-items:center;"
+                                    title="Pause/Reprendre">
+                                    <i class="fa-solid fa-pause"></i>
+                                </button>
+                            </span>
+                        </div>
+
+                        <!-- Full Width Estimation Gauge -->
+                        <div class="session-gauge" id="session-gauge"
+                            style="display: none; flex-direction: column; background: rgba(0,0,0,0.4); padding: 5px 15px 10px; border-bottom: 2px solid rgba(255,255,255,0.05);">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                <span
+                                    style="font-size: 0.7rem; color: #aaa; font-family: var(--font-heading); letter-spacing: 1px;">
+                                    <i class="fa-solid fa-chart-line"
+                                        style="margin-right: 5px; color: var(--fn-yellow);"></i> ESTIME DE TA NOTE
+                                </span>
+                                <span id="gauge-percent"
+                                    style="font-size: 0.75rem; font-weight: bold; font-family: var(--font-heading); color: var(--fn-yellow);">0%</span>
+                            </div>
+                            <div class="gauge-bar-container"
+                                style="width: 100%; height: 8px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);">
+                                <div id="gauge-fill"
+                                    style="width: 5%; height: 100%; background: #ff4d4d; border-radius: 10px; transition: all 1s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 0 15px rgba(255, 77, 77, 0.4);">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chat-container">
+                            <div class="chat-messages" id="chat-messages">
+                                <div class="message bot">
+                                    <div class="bubble">
+                                        Bonjour Alexandre ! Choisis une leçon sur la gauche pour commencer à
+                                        travailler.
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Disabled Overlay -->
+                            <div id="chat-overlay" class="chat-overlay">
+                                <div class="overlay-content">
+                                    <i class="fa-solid fa-arrow-left"></i>
+                                    <h3>Choisis une leçon à gauche pour commencer</h3>
+                                </div>
+                            </div>
+
+                            <div class="chat-input-area">
+                                <button class="tool-btn" id="mic-btn"><i class="fa-solid fa-microphone"></i></button>
+                                <input type="text" id="user-input" placeholder="Pose ta question sur le cours..."
+                                    autocomplete="off">
+                                <button class="send-btn" id="send-btn"><i class="fa-solid fa-paper-plane"></i></button>
+                                <button class="evaluate-btn" id="evaluate-btn" title="Terminer et évaluer la session">
+                                    <i class="fa-solid fa-flag-checkered"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- MODAL: EVALUATION RESULT -->
+            <div id="evaluation-modal" class="modal-overlay" style="display: none;">
+                <div class="modal-content evaluation-modal">
+                    <div class="modal-header">
+                        <i class="fa-solid fa-award"></i>
+                        <h2>Évaluation de ta Session</h2>
+                    </div>
+                    <div class="modal-body">
+                        <div class="evaluation-loading" id="eval-loading">
+                            <div class="spinner"></div>
+                            <p>Analyse de ta session en cours...</p>
+                        </div>
+                        <div class="evaluation-result" id="eval-result" style="display: none;">
+                            <div class="grade-circle">
+                                <span id="eval-grade">--</span>
+                                <small>/20</small>
+                            </div>
+                            <div class="eval-details">
+                                <div class="eval-stat">
+                                    <i class="fa-solid fa-comments"></i>
+                                    <span><strong id="eval-exchanges">0</strong> échanges</span>
+                                </div>
+                                <div class="eval-stat">
+                                    <i class="fa-solid fa-clock"></i>
+                                    <span><strong id="eval-duration">0</strong> min</span>
+                                </div>
+                                <div class="eval-stat">
+                                    <i class="fa-solid fa-book"></i>
+                                    <span id="eval-subject">-</span>
+                                </div>
+                            </div>
+                            <div class="eval-appreciation" id="eval-appreciation">
+                                <!-- Appreciation text from AI -->
+                            </div>
+                            <p class="eval-note-info">
+                                <i class="fa-solid fa-check-circle"></i>
+                                Cette note a été ajoutée à ton carnet de notes.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="modal-close-btn" id="close-eval-modal">Fermer</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MODAL: GRADE DETAILS -->
+            <div id="grade-detail-modal" class="modal-overlay" style="display: none;">
+                <div class="modal-content evaluation-modal"> <!-- Reusing same style -->
+                    <div class="modal-header">
+                        <i class="fa-solid fa-file-signature"></i>
+                        <h2 id="detail-modal-title">Détail de la Note</h2>
+                    </div>
+                    <div class="modal-body">
+                        <div class="grade-circle">
+                            <span id="detail-modal-grade">--</span>
+                            <small>/20</small>
+                        </div>
+                        <div class="eval-details">
+                            <div class="eval-stat">
+                                <i class="fa-solid fa-book"></i>
+                                <span id="detail-modal-subject">-</span>
+                            </div>
+                            <div class="eval-stat">
+                                <i class="fa-solid fa-calendar-days"></i>
+                                <span id="detail-modal-date">-</span>
+                            </div>
+                        </div>
+                        <div class="eval-appreciation" id="detail-modal-comment">
+                            <!-- Full comment here -->
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="modal-close-btn" id="close-detail-modal">Fermer</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: GRADES (CARNET DE NOTES) -->
+            <section id="grades" class="view">
+                <div class="grades-layout">
+                    <!-- ADD GRADE CARD -->
+                    <div class="stats-container" style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px;">
+                        <div class="card add-grade-card">
+                            <h3>Ajouter une Note</h3>
+                            <form id="grade-form" class="grade-form">
+                                <div class="form-group">
+                                    <label for="grade-subject">Matière</label>
+                                    <select id="grade-subject" required>
+                                        <option value="" disabled selected>Choisir une matière...</option>
+                                        <option value="Mathématiques">Mathématiques</option>
+                                        <option value="Français">Français</option>
+                                        <option value="SVT">SVT</option>
+                                        <option value="Anglais">Anglais</option>
+                                        <option value="Histoire">Histoire</option>
+                                        <option value="Italien">Italien</option>
+                                        <option value="Physique/Chimie">Physique/Chimie</option>
+                                        <option value="Arts plastiques">Arts plastiques</option>
+                                        <option value="Sport">Sport</option>
+                                        <option value="Éducation musicale">Éducation musicale</option>
+                                    </select>
+                                </div>
+                                <!-- Lieu supprimé car géré par n8n pour le home -->
+                                <div class="form-group">
+                                    <label for="grade-title">Commentaire</label>
+                                    <input type="text" id="grade-title" placeholder="ex: Super travail !">
+                                </div>
+                                <div class="form-group">
+                                    <label for="grade-date">Date du devoir</label>
+                                    <input type="date" id="grade-date" required>
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                    <div class="form-group">
+                                        <label for="grade-value">Note obtenue</label>
+                                        <input type="number" id="grade-value" min="0" step="any" placeholder="15"
+                                            required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="grade-scale">Sur combien ?</label>
+                                        <input type="number" id="grade-scale" min="1" step="any" value="20" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="grade-class-average">Moyenne de la classe</label>
+                                    <input type="number" id="grade-class-average" min="0" step="any" placeholder="12.5">
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                    <div class="form-group">
+                                        <label for="grade-min">Note min.</label>
+                                        <input type="number" id="grade-min" min="0" step="any" placeholder="8">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="grade-max">Note max.</label>
+                                        <input type="number" id="grade-max" min="0" step="any" placeholder="18">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="grade-coefficient">Coefficient</label>
+                                    <input type="number" id="grade-coefficient" min="0" max="10" step="any" value="1"
+                                        required>
+                                </div>
+                                <button type="submit" class="cta-btn"
+                                    style="width: 100%; margin-top: 10px; font-size: 1.1rem;">Valider la note</button>
+                            </form>
+                        </div>
+
+                        <!-- GRADES LIST CARD -->
+                        <div class="card grades-list-card">
+                            <div class="card-header-with-actions"
+                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 2px solid rgba(255, 255, 255, 0.1); padding-bottom: 10px;">
+                                <h3 style="margin-bottom: 0; border-bottom: none; padding-bottom: 0;">Historique des
+                                    Notes</h3>
+
+                                <div class="filter-tabs">
+                                    <button class="filter-tab active" id="filter-all"
+                                        onclick="filterGrades('all')">Tous</button>
+                                    <button class="filter-tab" id="filter-school" onclick="filterGrades('school')">🏫
+                                        École</button>
+                                    <button class="filter-tab" id="filter-home" onclick="filterGrades('home')">🏠
+                                        Maison</button>
+                                </div>
+
+                                <div class="sort-actions" style="display: flex; gap: 10px;">
+                                    <button class="sort-btn" onclick="sortGrades('date')" title="Trier par date"
+                                        style="background: rgba(255,255,255,0.05); border: 1px solid var(--fn-blue); color: var(--fn-blue); padding: 5px 10px; border-radius: 4px; cursor: pointer; font-family: var(--font-heading); font-size: 0.8rem; transition: all 0.2s; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">
+                                        <i class="fa-solid fa-calendar-days"></i> DATE
+                                    </button>
+                                    <button class="sort-btn" onclick="sortGrades('subject')" title="Trier par matière"
+                                        style="background: rgba(255,255,255,0.05); border: 1px solid var(--fn-purple); color: var(--fn-purple); padding: 5px 10px; border-radius: 4px; cursor: pointer; font-family: var(--font-heading); font-size: 0.8rem; transition: all 0.2s; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">
+                                        <i class="fa-solid fa-book"></i> MATIÈRE
+                                    </button>
+                                    <button class="sort-btn" onclick="sortGrades('grade')" title="Trier par note"
+                                        style="background: rgba(255,255,255,0.05); border: 1px solid var(--fn-yellow); color: var(--fn-yellow); padding: 5px 10px; border-radius: 4px; cursor: pointer; font-family: var(--font-heading); font-size: 0.8rem; transition: all 0.2s; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">
+                                        <i class="fa-solid fa-star"></i> NOTE
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="grades-table-container">
+                                <table class="grades-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Matière</th>
+                                            <th>Commentaire</th>
+                                            <th>Coef</th>
+                                            <th>Note</th>
+                                            <th>Moy.</th>
+                                            <th>Min</th>
+                                            <th>Max</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="grades-tbody">
+                                        <!-- Grades will be injected here -->
+                                        <tr>
+                                            <td colspan="8" style="text-align:center; padding: 20px; opacity: 0.5;">
+                                                Aucune pour le moment.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PROGRESSION & DISTRIBUTION ROW -->
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-top: 20px;">
+                        <!-- PROGRESSION CHART CARD -->
+                        <div class="card chart-card">
+                            <h3>Analyse de Progression</h3>
+                            <div class="chart-wrapper" style="height: 400px; position: relative;">
+                                <canvas id="progressionChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- DISTRIBUTION CHART CARD -->
+                        <div class="card chart-card performance-summary">
+                            <h3>Performance vs Moyenne</h3>
+                            <div class="chart-wrapper" style="height: 400px; position: relative;">
+                                <canvas id="distributionChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- NEW: ASSIDUITY & SKILLS ROW -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+                        <!-- ACTIVITY CHART -->
+                        <div class="card chart-card">
+                            <h3>Assiduité (Volume de devoirs par mois)</h3>
+                            <div class="chart-wrapper" style="height: 350px; position: relative;">
+                                <canvas id="activityChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- RADAR CHART -->
+                        <div class="card chart-card">
+                            <h3>Radar des Compétences (Moyennes par matière)</h3>
+                            <div class="chart-wrapper" style="height: 350px; position: relative;">
+                                <canvas id="radarChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Chart.js -->
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+            <section id="achievements" class="view">
+                <div class="stats-container"
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                    <div class="card xp-card">
+                        <h3>Niveau Global</h3>
+                        <div class="level-circle">
+                            <svg viewBox="0 0 36 36" class="circular-chart">
+                                <path class="circle-bg"
+                                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path class="circle" stroke-dasharray="65, 100"
+                                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            </svg>
+                            <div class="percentage">Lvl 6</div>
+                        </div>
+                        <p>2340 / 3000 XP</p>
+                    </div>
+
+                    <!-- BILAN CONSEIL DE CLASSE -->
+                    <div class="card conseil-classe-card">
+                        <div class="conseil-header">
+                            <i class="fa-solid fa-clipboard-list"></i>
+                            <h3>Bilan Conseil de Classe</h3>
+                        </div>
+                        <div class="conseil-content">
+                            <!-- Appreciation générale -->
+                            <div class="appreciation-box">
+                                <div class="appreciation-label">Appréciation Générale</div>
+                                <p id="conseil-appreciation" class="appreciation-text">En attente des notes...</p>
+                            </div>
+
+                            <!-- Points forts -->
+                            <div class="conseil-section points-forts">
+                                <div class="section-header">
+                                    <i class="fa-solid fa-star"></i>
+                                    <span>Points Forts</span>
+                                </div>
+                                <ul id="conseil-points-forts" class="conseil-list">
+                                    <li class="placeholder">Aucune donnée</li>
+                                </ul>
+                            </div>
+
+                            <!-- Points à améliorer -->
+                            <div class="conseil-section points-ameliorer">
+                                <div class="section-header">
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                    <span>À Améliorer</span>
+                                </div>
+                                <ul id="conseil-points-ameliorer" class="conseil-list">
+                                    <li class="placeholder">Aucune donnée</li>
+                                </ul>
+                            </div>
+
+                            <!-- Conseil personnalisé -->
+                            <div class="conseil-message" id="conseil-message">
+                                <i class="fa-solid fa-lightbulb"></i>
+                                <span>Continue tes efforts !</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- NEW: PLAYSTATION TIME CARD -->
+                    <div class="card playstation-card">
+                        <div class="ps-header">
+                            <i class="fa-brands fa-playstation"></i>
+                            <h3>Temps PlayStation</h3>
+                        </div>
+                        <div class="ps-content">
+                            <div class="ps-time-display">
+                                <span id="ps-hours">--</span>
+                                <small>HEURES / SEMAINE</small>
+                            </div>
+                            <div class="ps-stats-grid"
+                                style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                                <div class="ps-stat">
+                                    <span class="label">Moyenne École</span>
+                                    <span id="ps-my-avg" class="value" style="color: var(--fn-blue);">--</span>
+                                </div>
+                                <div class="ps-stat">
+                                    <span class="label">Moyenne Classe</span>
+                                    <span id="ps-class-avg" class="value" style="color: var(--fn-purple);">--</span>
+                                </div>
+                                <div class="ps-stat">
+                                    <span class="label">Bonus Maison</span>
+                                    <span id="ps-home-bonus" class="value" style="color: var(--fn-green);">--</span>
+                                </div>
+                            </div>
+                            <div class="ps-progress-container" style="margin-top: 15px;">
+                                <div class="ps-progress-header">
+                                    <span>Ratio Performance</span>
+                                    <span id="ps-ratio-val">0%</span>
+                                </div>
+                                <div class="ps-progress-bar">
+                                    <div id="ps-progress-fill" class="fill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <p id="ps-status-msg" class="ps-message">En attente de tes notes pour le calcul...</p>
+
+                            <!-- DETAILS BY SUBJECT -->
+                            <div class="ps-details-section">
+                                <div class="ps-details-header" onclick="togglePsDetails()">
+                                    <span><i class="fa-solid fa-chart-bar"></i> Détail par matière</span>
+                                    <i id="ps-toggle-icon" class="fa-solid fa-chevron-down"></i>
+                                </div>
+                                <div id="ps-details-content" class="ps-details-content" style="display: none;">
+                                    <table class="ps-details-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Matière</th>
+                                                <th>Coef</th>
+                                                <th>Ma moy.</th>
+                                                <th>Classe</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="ps-details-tbody">
+                                            <!-- Filled by JS -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: HISTORY -->
+            <section id="history" class="view">
+                <div class="welcome-banner" style="margin-bottom: 25px;">
+                    <div class="welcome-text">
+                        <h1>📜 Bibliothèque des <span class="highlight">Aventures</span></h1>
+                        <p>Retrouve tes anciennes discussions et tes progrès passés.</p>
+                        <button class="cta-btn" onclick="refreshHistory()"><i class="fa-solid fa-arrows-rotate"></i>
+                            Actualiser</button>
+                    </div>
+                </div>
+
+                <div class="history-filters card"
+                    style="margin-bottom: 20px; padding: 15px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                    <div style="display: flex; gap: 10px; align-items: center; flex: 1; min-width: 200px;">
+                        <i class="fa-solid fa-filter" style="color: var(--fn-blue);"></i>
+                        <select id="history-subject-filter" onchange="applyHistoryFilter()"
+                            style="background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); padding: 8px 15px; border-radius: 8px; font-family: inherit; width: 100%;">
+                            <option value="all">Toutes les matières</option>
+                            <option value="Mathématiques">Mathématiques</option>
+                            <option value="Français">Français</option>
+                            <option value="SVT">SVT</option>
+                            <option value="Anglais">Anglais</option>
+                            <option value="Histoire">Histoire</option>
+                            <option value="Italien">Italien</option>
+                            <option value="Physique">Physique/Chimie</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center; flex: 2; min-width: 250px;">
+                        <i class="fa-solid fa-magnifying-glass" style="color: var(--fn-purple);"></i>
+                        <input type="text" id="history-search-input" oninput="applyHistoryFilter()"
+                            placeholder="Rechercher par mot-clé dans le titre..."
+                            style="background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); padding: 8px 15px; border-radius: 8px; font-family: inherit; width: 100%; outline: none;">
+                    </div>
+                </div>
+
+                <div id="history-loading" class="card" style="text-align: center; padding: 40px; display: none;">
+                    <div class="loading-spinner" style="margin: 0 auto;"></div>
+                    <p style="margin-top: 15px; opacity: 0.7;">Chargement de tes souvenirs...</p>
+                </div>
+
+                <div id="history-empty" class="card" style="text-align: center; padding: 40px; display: block;">
+                    <i class="fa-solid fa-ghost" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.3;"></i>
+                    <p style="opacity: 0.7;">Aucune session trouvée. Commence une leçon pour remplir ton historique !
+                    </p>
+                </div>
+
+                <div id="history-list" class="dashboard-grid"
+                    style="grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); margin-top: 20px; display: grid;">
+                    <!-- Cards will be injected here -->
+                </div>
+            </section>
+        </main>
+
+        <!-- RIGHT SIDEBAR (GAMIFICATION) -->
+        <aside class="sidebar-right">
+            <div class="stats-widget">
+                <h3>Dernières Notes</h3>
+                <div id="recent-grades-list">
+                    <div class="stat-item">
+                        <div class="stat-header">
+                            <span class="subject-label math-text">Maths</span>
+                            <span class="xp-val">16/20</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="fill math-bg" style="width: 80%"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat-item">
+                        <div class="stat-header">
+                            <span class="subject-label french-text">Français</span>
+                            <span class="xp-val">14/20</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="fill french-bg" style="width: 70%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MAGIC TRANSLATOR (Hidden by default, shown for languages) -->
+            <div id="translator-widget" class="translator-widget" style="display: none;">
+                <h3>Traducteur Magique</h3>
+                <div class="translator-box">
+                    <textarea id="trans-input" placeholder="Tape un mot ou une phrase..."></textarea>
+                    <div class="translator-controls">
+                        <select id="trans-lang">
+                            <option value="en|fr">🇬🇧 Anglais ➡️ 🇫🇷 Fr</option>
+                            <option value="fr|en">🇫🇷 Fr ➡️ 🇬🇧 Anglais</option>
+                            <option value="it|fr">🇮🇹 Italien ➡️ 🇫🇷 Fr</option>
+                            <option value="fr|it">🇫🇷 Fr ➡️ 🇮🇹 Italien</option>
+                        </select>
+                        <button id="trans-btn"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
+                    </div>
+                    <div id="trans-result" class="trans-result"></div>
+                </div>
+            </div>
+
+            <div class="goals-widget">
+                <h3>Objectifs Hebdo</h3>
+                <ul class="goals-list">
+                    <li class="done"><i class="fa-solid fa-check-circle"></i> 5 Leçons complétées</li>
+                    <li class="done"><i class="fa-solid fa-check-circle"></i> 100% au Quiz Maths</li>
+                    <li class="pending"><i class="fa-regular fa-circle"></i> Parler 10min en Anglais</li>
+                </ul>
+            </div>
+        </aside>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
