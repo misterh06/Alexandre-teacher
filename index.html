@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alexandre Cyber Academy // Terminal 5ème</title>
+    <!-- Google Fonts: Outfit & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="style.css">
+    <!-- KaTeX for Math Formulas -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+        onload="console.log('KaTeX Loaded')"></script>
+</head>
+
+<body>
+    <!-- Background Cyber Grid & Glow Orbs -->
+    <div class="cyber-background">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+        <div class="cyber-grid-overlay"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- LEFT SIDEBAR: CYBER COMMAND -->
+        <nav class="sidebar-left">
+            <div class="brand-header">
+                <div class="brand-logo">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-title">CYBER ACADEMY</span>
+                    <span class="brand-sub">Alexandre // Terminal 5ème</span>
+                </div>
+            </div>
+
+            <ul class="nav-links">
+                <li class="nav-item active" data-target="dashboard" id="nav-dashboard">
+                    <div class="nav-icon"><i class="fa-solid fa-gauge-high"></i></div>
+                    <div class="nav-label">
+                        <span>Centre de Contrôle</span>
+                        <small>Vue d'ensemble</small>
+                    </div>
+                </li>
+                <li class="nav-item" data-target="chat" id="nav-chat">
+                    <div class="nav-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                    <div class="nav-label">
+                        <span>Le Professeur</span>
+                        <small>Tuteur IA</small>
+                    </div>
+                </li>
+                <li class="nav-item" data-target="grades" id="nav-grades">
+                    <div class="nav-icon"><i class="fa-solid fa-chart-pie"></i></div>
+                    <div class="nav-label">
+                        <span>Carnet & Métriques</span>
+                        <small>Analyses de notes</small>
+                    </div>
+                </li>
+                <li class="nav-item" data-target="achievements" id="nav-achievements">
+                    <div class="nav-icon"><i class="fa-solid fa-gamepad"></i></div>
+                    <div class="nav-label">
+                        <span>Défi PlayStation</span>
+                        <small>Notes & temps de jeu</small>
+                    </div>
+                </li>
+            </ul>
+
+            <!-- Security Clearance Profile -->
+            <div class="user-profile-badge">
+                <div class="agent-avatar">
+                    <i class="fa-solid fa-user-shield"></i>
+                    <span class="status-indicator online"></span>
+                </div>
+                <div class="agent-details">
+                    <div class="agent-name">Agent Alexandre</div>
+                    <div class="agent-role"><span class="badge-role">Niveau 5ème</span> • Cyber Cadet</div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="main-content">
+            <!-- TOP HEADER HUD -->
+            <header class="top-header">
+                <div class="header-left">
+                    <div class="terminal-status">
+                        <span class="dot-blink"></span>
+                        <span class="status-text">SYSTÈME OPÉRATIONNEL // CYCLE 4</span>
+                    </div>
+                    <h1 id="page-title">Centre de Contrôle</h1>
+                </div>
+
+                <div class="header-actions">
+                    <div class="security-chip" title="Moyenne générale en temps réel">
+                        <i class="fa-solid fa-shield-cat"></i>
+                        <span>Moyenne Générale :</span>
+                        <strong id="global-average-badge">--/20</strong>
+                    </div>
+
+                    <!-- Theme Toggle -->
+                    <button class="action-btn theme-toggle-btn" id="theme-toggle" title="Changer de thème visuel">
+                        <i class="fa-solid fa-sliders"></i>
+                        <span class="btn-text">Thème</span>
+                    </button>
+
+                    <!-- Notifications / Alerts -->
+                    <button class="action-btn notif-toggle-btn" id="notif-btn" title="Alertes de sécurité">
+                        <i class="fa-solid fa-satellite-dish"></i>
+                        <span class="pulse-badge">3</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- VIEWS CONTAINER -->
+            <div class="views-wrapper">
+
+                <!-- VIEW 1: DASHBOARD -->
+                <section id="dashboard" class="view active-view">
+                    <!-- Hero Welcome Banner -->
+                    <div class="cyber-banner">
+                        <div class="banner-content">
+                            <div class="protocol-tag"><i class="fa-solid fa-lock"></i> PROTOCOLE D'APPRENTISSAGE ACTIF</div>
+                            <h2>Prêt pour les défis du jour, <span class="highlight-agent">Alexandre</span> ?</h2>
+                            <p>Toutes les défenses sont activées. Ton prochain objectif t'attend en <strong>Mathématiques</strong> et <strong>Physique/Chimie</strong>.</p>
+                            <div class="banner-actions">
+                                <button class="primary-btn" onclick="navigateTo('chat', 'Prêt pour la session de travail !')">
+                                    <i class="fa-solid fa-graduation-cap"></i> Rejoindre Le Professeur
+                                </button>
+                                <button class="secondary-btn" onclick="navigateTo('grades')">
+                                    <i class="fa-solid fa-clipboard-check"></i> Voir mon Carnet
+                                </button>
+                            </div>
+                        </div>
+                        <div class="banner-radar-visual">
+                            <div class="radar-circle"></div>
+                            <div class="radar-sweep"></div>
+                            <i class="fa-solid fa-fingerprint radar-center-icon"></i>
+                        </div>
+                    </div>
+
+                    <!-- Dashboard KPI Grid -->
+                    <div class="kpi-grid">
+                        <div class="kpi-card" onclick="navigateTo('grades')">
+                            <div class="kpi-header">
+                                <span class="kpi-title">Moyenne Générale</span>
+                                <div class="kpi-icon cyan"><i class="fa-solid fa-calculator"></i></div>
+                            </div>
+                            <div class="kpi-body">
+                                <span class="kpi-value" id="dashboard-overall-grade">--</span>
+                                <span class="kpi-scale">/20</span>
+                            </div>
+                            <div class="kpi-footer">
+                                <span class="trend-text" id="dashboard-trend-label"><i class="fa-solid fa-check"></i> Calculé avec coefs</span>
+                            </div>
+                        </div>
+
+                        <div class="kpi-card" onclick="navigateTo('achievements')">
+                            <div class="kpi-header">
+                            <span class="kpi-title">Temps de jeu gagné</span>
+                            <div class="kpi-icon purple"><i class="fa-solid fa-gamepad"></i></div>
+                            </div>
+                            <div class="kpi-body">
+                                <span class="kpi-value" id="dashboard-playtime">0</span>
+                                <span class="kpi-scale">min</span>
+                            </div>
+                            <div class="kpi-footer">
+                                <div class="mini-xp-bar">
+                                    <div class="mini-fill" id="dashboard-playtime-fill" style="width: 0%"></div>
+                                </div>
+                                <span class="mini-xp-text" id="dashboard-playtime-label">Objectif du jour : 60 min</span>
+                            </div>
+                        </div>
+
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <span class="kpi-title">Missions de Sécurité</span>
+                                <div class="kpi-icon emerald"><i class="fa-solid fa-list-check"></i></div>
+                            </div>
+                            <div class="kpi-body">
+                                <span class="kpi-value">3</span>
+                                <span class="kpi-scale">en cours</span>
+                            </div>
+                            <div class="kpi-footer">
+                                <span class="trend-text"><i class="fa-solid fa-crosshairs"></i> Quête du jour : Conjugaison</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Activity & Quick Actions -->
+                    <div class="dashboard-grid-dual">
+                        <!-- Recent Activity / Logs -->
+                        <div class="card cyber-card">
+                            <div class="card-header">
+                                <h3><i class="fa-solid fa-clock-rotate-left"></i> Journal d'Activité Récente</h3>
+                                <span class="badge-chip">Sécurisé</span>
+                            </div>
+                            <ul class="activity-timeline" id="recent-activity-list">
+                                <li class="activity-empty"><i class="fa-solid fa-circle-notch fa-spin"></i> Synchronisation de l'activité...</li>
+                            </ul>
+                        </div>
+
+                        <!-- Daily Quest & Security Protocols -->
+                        <div class="card cyber-card">
+                            <div class="card-header">
+                                <h3><i class="fa-solid fa-bullseye"></i> Quête Opérationnelle du Jour</h3>
+                                <span class="badge-chip glow">+150 XP</span>
+                            </div>
+                            <div class="quest-box">
+                                <div class="quest-icon-wrap">
+                                    <i class="fa-solid fa-satellite"></i>
+                                </div>
+                                <div class="quest-text-block">
+                                    <h4>Mission : Pare-feu Grammatical</h4>
+                                    <p>Complète 3 exercices d'accord du participe passé en Français.</p>
+                                    <div class="quest-progress-container">
+                                        <div class="quest-bar">
+                                            <div class="quest-fill" style="width: 33.3%;"></div>
+                                        </div>
+                                        <div class="quest-meta-labels">
+                                            <span>Progression</span>
+                                            <strong>1 / 3 validés</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="quick-subjects-row">
+                                <span class="row-label">Accès direct :</span>
+                                <button class="chip-subject" onclick="startSubject('Mathématiques')">Maths</button>
+                                <button class="chip-subject" onclick="startSubject('Français')">Français</button>
+                                <button class="chip-subject" onclick="startSubject('Physique/Chimie')">Physique</button>
+                                <button class="chip-subject" onclick="startSubject('Technologie')">Technologie</button>
+                                <button class="chip-subject" onclick="startSubject('Anglais')">Anglais</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Evaluation Modal -->
+                <div id="evaluation-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="eval-modal-title" style="display:none;">
+                    <div class="modal-content eval-modal">
+                        <button id="close-eval-modal" class="modal-close" type="button" aria-label="Fermer">&times;</button>
+                        <div class="modal-eyebrow"><i class="fa-solid fa-file-circle-check"></i> SESSION REPORT</div>
+                        <h3 id="eval-modal-title">Rapport d'évaluation</h3>
+                        <div id="eval-loading" class="eval-loading" style="display:none;">
+                            <i class="fa-solid fa-circle-notch fa-spin"></i> Analyse en cours...
+                        </div>
+                        <div id="eval-result" style="display:none;">
+                            <div class="eval-top">
+                                <div id="eval-grade" class="grade-circle">--</div>
+                                <div class="eval-meta">
+                                    <div>Matière : <strong id="eval-subject">-</strong></div>
+                                    <div>Durée : <strong id="eval-duration">0</strong> min</div>
+                                    <div>Échanges : <strong id="eval-exchanges">0</strong></div>
+                                </div>
+                            </div>
+                            <div class="eval-report-heading">
+                                <span>Teacher's feedback</span>
+                                <div class="eval-language-control" role="group" aria-label="Voice language">
+                                    <span class="eval-language-label">Read in</span>
+                                    <div class="language-segmented" id="eval-language-buttons">
+                                        <button type="button" class="language-option active" data-language="fr-FR" aria-pressed="true" title="Français"><span class="language-flag">🇫🇷</span> <span>Français</span></button>
+                                        <button type="button" class="language-option" data-language="en-US" aria-pressed="false" title="English"><span class="language-flag">🇬🇧</span> <span>English</span></button>
+                                        <button type="button" class="language-option" data-language="it-IT" aria-pressed="false" title="Italiano"><span class="language-flag">🇮🇹</span> <span>Italiano</span></button>
+                                    </div>
+                                    <select id="eval-language-select" aria-label="Voice language">
+                                        <option value="fr-FR">FR</option>
+                                        <option value="en-US">EN</option>
+                                        <option value="it-IT">IT</option>
+                                    </select>
+                                </div>
+                                <button id="eval-speech-btn" class="speech-btn" type="button">
+                                    <i class="fa-solid fa-play"></i> Play
+                                </button>
+                            </div>
+                            <div id="eval-translation-status" class="eval-translation-status" aria-live="polite"></div>
+                            <div id="eval-appreciation" class="eval-appreciation"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW 2: CHAT (LE PROFESSEUR // CONSOLE IA) -->
+                <section id="chat" class="view">
+                    <div class="professor-layout">
+                        <!-- LEFT PANEL: LESSONS & DRIVE VAULT -->
+                        <aside class="files-panel">
+                            <div class="files-header">
+                                <div class="panel-badge-title">
+                                    <i class="fa-solid fa-folder-closed"></i>
+                                    <h3>Coffre-Fort des Cours</h3>
+                                </div>
+                                <p class="panel-desc">Sélectionne une matière connectée au Google Drive :</p>
+                                
+                                <div class="select-wrapper">
+                                    <i class="fa-solid fa-graduation-cap select-icon"></i>
+                                    <select id="subject-select">
+                                        <option value="" disabled selected>Choisir une matière...</option>
+                                        <option value="mathematiques">Mathématiques</option>
+                                        <option value="francais">Français</option>
+                                        <option value="physique">Physique / Chimie</option>
+                                        <option value="technologie">Technologie</option>
+                                        <option value="svt">SVT</option>
+                                        <option value="anglais">Anglais (LV1)</option>
+                                        <option value="histoire">Histoire / Géographie</option>
+                                        <option value="italien">Italien (LV2)</option>
+                                    </select>
+                                </div>
+
+                                <!-- OCR & File Upload -->
+                                <div class="upload-section">
+                                    <button id="upload-lesson-btn" class="cyber-upload-btn">
+                                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                                        <span>Scanner / Importer un cours</span>
+                                    </button>
+                                    <input type="file" id="lesson-file-input" accept="image/*,.pdf" style="display: none;">
+                                </div>
+
+                                <!-- Work Mode Switcher -->
+                                <div class="mode-selector-container">
+                                    <label class="mode-title"><i class="fa-solid fa-sliders"></i> Mode d'interaction :</label>
+                                    <div class="mode-options">
+                                        <input type="radio" name="work-mode" id="mode-revision" value="revision" checked style="display: none;">
+                                        <label for="mode-revision" class="mode-btn"><i class="fa-solid fa-brain"></i> Révision</label>
+
+                                        <input type="radio" name="work-mode" id="mode-devoir" value="devoir" style="display: none;">
+                                        <label for="mode-devoir" class="mode-btn"><i class="fa-solid fa-pen-ruler"></i> Devoir</label>
+
+                                        <input type="radio" name="work-mode" id="mode-lecon" value="lecon" style="display: none;">
+                                        <label for="mode-lecon" class="mode-btn"><i class="fa-solid fa-book-open"></i> Leçon</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- List of Documents from Drive -->
+                            <div id="files-list" class="files-list">
+                                <div class="files-empty-state">
+                                    <i class="fa-solid fa-arrow-up-long pulse-icon"></i>
+                                    <span>Sélectionne une matière ci-dessus pour charger tes fiches et documents.</span>
+                                </div>
+                            </div>
+                        </aside>
+
+                        <!-- RIGHT PANEL: SECURE TERMINAL CHAT -->
+                        <div class="chat-main-area">
+                            <!-- Terminal Status Bar -->
+                            <div class="chat-status-bar">
+                                <div class="active-lesson-badge">
+                                    <i class="fa-solid fa-file-shield"></i>
+                                    <span class="status-label">Document actif :</span>
+                                    <span id="active-lesson-name" class="status-value">Aucun (Session libre)</span>
+                                </div>
+                                <div class="session-actions">
+                                    <span class="cipher-tag"><i class="fa-solid fa-lock"></i> Canal IA n8n</span>
+                                    <button class="clear-chat-btn" id="btn-clear-chat" title="Effacer l'historique de la session">
+                                        <i class="fa-solid fa-rotate-right"></i>
+                                    </button>
+                                    <!-- Session Timer & Evaluation -->
+                                    <div id="session-timer" class="session-timer" style="display:none; align-items:center; gap:8px; margin-left:12px;">
+                                        <div id="session-gauge" style="display:flex; align-items:center; gap:8px;">
+                                            <div style="width:80px; height:8px; background:rgba(255,255,255,0.06); border-radius:6px; overflow:hidden;">
+                                                <div id="gauge-fill" style="width:5%; height:100%; background:#2ecc71"></div>
+                                            </div>
+                                            <div id="gauge-percent" style="font-size:0.85rem; opacity:0.9;">0%</div>
+                                        </div>
+                                        <div id="session-time" style="font-family:var(--font-mono); font-size:0.95rem;">00:00</div>
+                                        <button id="pause-timer-btn" class="tool-btn" title="Pause/Play" style="padding:6px 8px;"><i class="fa-solid fa-pause"></i></button>
+                                        <button id="evaluate-btn" class="secondary-btn" title="Évaluer la session" style="margin-left:6px;">Évaluer</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="chat-container">
+                                <!-- Messages Stream -->
+                                <div class="chat-messages" id="chat-messages">
+                                    <div class="message bot">
+                                        <div class="avatar-speaker"><i class="fa-solid fa-shield-virus"></i></div>
+                                        <div class="bubble">
+                                            Bonjour Alexandre ! Je suis ton tuteur d'entraînement et de cyberdéfense scolaire pour la 5ème.
+                                            <br><br>
+                                            Choisis une matière à gauche ou pose-moi directement ta question sur ton cours de maths, tes devoirs ou tes exercices !
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Overlay if not selected (soft helper) -->
+                                <div id="chat-overlay" class="chat-overlay">
+                                    <div class="overlay-content">
+                                        <div class="overlay-icon"><i class="fa-solid fa-arrow-left"></i></div>
+                                        <h3>Accès Terminal Libre ou sur Cours</h3>
+                                        <p>Choisis une matière à gauche ou commence à taper ci-dessous.</p>
+                                    </div>
+                                </div>
+
+                                <!-- Input Bar with Mic & Audio features -->
+                                <div class="chat-input-area">
+                                    <!-- Mic Speech-to-Text Button -->
+                                    <button class="tool-btn mic-btn" id="mic-btn" title="Activer la reconnaissance vocale">
+                                        <i class="fa-solid fa-microphone"></i>
+                                    </button>
+                                    <input type="text" id="user-input" placeholder="Pose ta question au professeur IA..." autocomplete="off">
+                                    <button class="send-btn" id="send-btn" title="Envoyer le message">
+                                        <i class="fa-solid fa-paper-plane"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 3: GRADES (CARNET DE NOTES & ANALYTIQUE) -->
+                <section id="grades" class="view">
+                    <div class="grades-layout">
+                        <!-- Top Summary KPI Banner -->
+                        <div class="grades-summary-row">
+                            <div class="grade-kpi-pill">
+                                <i class="fa-solid fa-award pill-icon gold"></i>
+                                <div class="pill-info">
+                                    <span class="pill-title">Moyenne Générale Pondérée</span>
+                                    <strong class="pill-val" id="grades-page-average">--/20</strong>
+                                </div>
+                            </div>
+                            <div class="grade-kpi-pill">
+                                <i class="fa-solid fa-arrow-trend-up pill-icon cyan"></i>
+                                <div class="pill-info">
+                                    <span class="pill-title">Meilleure Note</span>
+                                    <strong class="pill-val" id="grades-page-best">--/20</strong>
+                                </div>
+                            </div>
+                            <div class="grade-kpi-pill">
+                                <i class="fa-solid fa-layer-group pill-icon purple"></i>
+                                <div class="pill-info">
+                                    <span class="pill-title">Total Évaluations</span>
+                                    <strong class="pill-val" id="grades-page-count">0</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form & Table Grid -->
+                        <div class="grades-grid-main">
+                            <!-- ADD GRADE CARD -->
+                            <div class="card cyber-card add-grade-card">
+                                <div class="card-header">
+                                    <h3><i class="fa-solid fa-plus-circle"></i> Enregistrer un Devoir</h3>
+                                    <span class="badge-chip">Google Sheets</span>
+                                </div>
+
+                                <form id="grade-form" class="grade-form">
+                                    <div class="form-group">
+                                        <label for="grade-subject"><i class="fa-solid fa-book"></i> Matière</label>
+                                        <select id="grade-subject" required>
+                                            <option value="" disabled selected>Choisir une matière...</option>
+                                            <option value="Mathématiques">Mathématiques</option>
+                                            <option value="Français">Français</option>
+                                            <option value="Physique/Chimie">Physique/Chimie</option>
+                                            <option value="Technologie">Technologie</option>
+                                            <option value="SVT">SVT</option>
+                                            <option value="Anglais">Anglais</option>
+                                            <option value="Histoire">Histoire / Géo</option>
+                                            <option value="Italien">Italien</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="grade-title"><i class="fa-solid fa-comment-dots"></i> Intitulé / Commentaire</label>
+                                        <input type="text" id="grade-title" placeholder="ex: Contrôle sur les fractions">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="grade-date"><i class="fa-solid fa-calendar-day"></i> Date du devoir</label>
+                                        <input type="date" id="grade-date" required>
+                                    </div>
+
+                                    <div class="form-row-dual">
+                                        <div class="form-group">
+                                            <label for="grade-value"><i class="fa-solid fa-star"></i> Note obtenue</label>
+                                            <input type="number" id="grade-value" min="0" step="any" placeholder="16.5" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="grade-scale"><i class="fa-solid fa-bullseye"></i> Sur combien ?</label>
+                                            <input type="number" id="grade-scale" min="1" step="any" value="20" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-row-dual">
+                                        <div class="form-group">
+                                            <label for="grade-class-average"><i class="fa-solid fa-users"></i> Moy. classe</label>
+                                            <input type="number" id="grade-class-average" min="0" step="any" placeholder="12">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="grade-coefficient"><i class="fa-solid fa-weight-scale"></i> Coefficient</label>
+                                            <input type="number" id="grade-coefficient" min="0" max="10" step="any" value="1" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-row-dual">
+                                        <div class="form-group">
+                                            <label for="grade-min"><i class="fa-solid fa-arrow-down"></i> Note min.</label>
+                                            <input type="number" id="grade-min" min="0" step="any" placeholder="7">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="grade-max"><i class="fa-solid fa-arrow-up"></i> Note max.</label>
+                                            <input type="number" id="grade-max" min="0" step="any" placeholder="19">
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="cyber-submit-btn">
+                                        <i class="fa-solid fa-check-double"></i> Synchroniser la Note
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- GRADES TABLE LIST -->
+                            <div class="card cyber-card grades-list-card">
+                                <div class="card-header">
+                                    <h3><i class="fa-solid fa-list-numeric"></i> Historique des Notes</h3>
+                                    <div class="table-header-controls">
+                                        <!-- Filtre Type de Devoirs : Tous | École | Maison -->
+                                        <div class="table-type-toggles" id="table-type-toggles">
+                                            <button type="button" class="table-type-btn active" data-type="all" id="btn-table-type-all" title="Tous les devoirs">
+                                                <i class="fa-solid fa-layer-group"></i> Tous
+                                            </button>
+                                            <button type="button" class="table-type-btn" data-type="ecole" id="btn-table-type-ecole" title="Devoirs passés à l'école">
+                                                <i class="fa-solid fa-school"></i> Devoirs École
+                                            </button>
+                                            <button type="button" class="table-type-btn" data-type="maison" id="btn-table-type-maison" title="Devoirs et entraînements à la maison">
+                                                <i class="fa-solid fa-house-user"></i> Devoirs Maison
+                                            </button>
+                                        </div>
+
+                                        <div class="year-filter-wrapper">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <select id="school-year-filter" title="Filtrer par année scolaire">
+                                                <option value="all">Toutes les années</option>
+                                            </select>
+                                        </div>
+                                        <button class="refresh-grades-btn" id="btn-refresh-grades" title="Rafraîchir depuis le serveur">
+                                            <i class="fa-solid fa-arrows-rotate"></i> Actualiser
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="grades-table-container">
+                                    <table class="grades-table">
+                                        <thead>
+                                            <tr>
+                                                <th class="sortable-th" data-sort="date" title="Trier par date">Date <i class="fa-solid fa-sort"></i></th>
+                                                <th class="sortable-th" data-sort="subject" title="Trier par matière">Matière <i class="fa-solid fa-sort"></i></th>
+                                                <th>Commentaire</th>
+                                                <th>Rapport</th>
+                                                <th class="sortable-th" data-sort="coef" title="Trier par coefficient">Coef <i class="fa-solid fa-sort"></i></th>
+                                                <th class="sortable-th" data-sort="grade" title="Trier par note">Note <i class="fa-solid fa-sort"></i></th>
+                                                <th>Moy.</th>
+                                                <th>Min</th>
+                                                <th>Max</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="grades-tbody">
+                                            <tr>
+                                                <td colspan="9" class="table-empty-row">
+                                                    <i class="fa-solid fa-circle-notch fa-spin"></i> Chargement des données...
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ANALYTIC CHARTS -->
+                        <div class="charts-grid-row">
+                            <div class="card cyber-card chart-card">
+                                <div class="card-header chart-controls-header">
+                                    <div class="chart-header-left"><h3><i class="fa-solid fa-chart-line"></i> Analyse de Progression</h3></div>
+                                    <div class="chart-header-actions">
+                                        <div class="chart-mode-toggles">
+                                            <button type="button" class="chart-toggle-btn active" data-mode="monthly" id="btn-chart-monthly"><i class="fa-solid fa-calendar-days"></i> Mensuelle</button>
+                                            <button type="button" class="chart-toggle-btn" data-mode="recent" id="btn-chart-recent"><i class="fa-solid fa-chart-column"></i> 15 Devoirs</button>
+                                        </div>
+                                        <select id="chart-subject-filter" class="chart-mini-select"><option value="all">Toutes matières</option><option value="Mathématiques">Maths</option><option value="Français">Français</option><option value="Physique/Chimie">Physique/Chimie</option><option value="Technologie">Technologie</option><option value="SVT">SVT</option><option value="Anglais">Anglais</option><option value="Histoire">Histoire</option><option value="Italien">Italien</option></select>
+                                    </div>
+                                </div>
+                                <div class="chart-wrapper"><canvas id="progressionChart"></canvas></div>
+                            </div>
+                            <div class="card cyber-card chart-card performance-summary">
+                                <div class="card-header"><h3><i class="fa-solid fa-shield-virus"></i> Performance vs Moyenne</h3><span class="badge-chip">Boss Fight</span></div>
+                                <div class="chart-wrapper"><canvas id="distributionChart"></canvas></div>
+                            </div>
+                        </div>
+                        <div class="charts-grid-row secondary">
+                            <div class="card cyber-card chart-card"><div class="card-header"><h3><i class="fa-solid fa-bars-staggered"></i> Assiduité (Devoirs / Mois)</h3></div><div class="chart-wrapper"><canvas id="activityChart"></canvas></div></div>
+                            <div class="card cyber-card chart-card"><div class="card-header"><h3><i class="fa-solid fa-chart-radar"></i> Radar de Défense Scolaire</h3><div class="radar-source-toggle" style="margin-left:auto; display:flex; gap:8px; align-items:center;"><span style="font-size:0.75rem; color:var(--text-dim);">Source</span><div><button class="chart-toggle-btn radar-source-btn active" data-source="ecole">École</button><button class="chart-toggle-btn radar-source-btn" data-source="maison">Maison</button><button class="chart-toggle-btn radar-source-btn" data-source="all">Tous</button></div></div></div><div class="chart-wrapper"><canvas id="radarChart"></canvas></div></div>
+                        </div>
+
+                    </div>
+                </section>
+
+                        <!-- VIEW 4: PLAYSTATION REWARD CONTRACT -->
+                        <section id="achievements" class="view">
+                            <div class="stats-container-modern">
+                                <div class="playtime-hero card cyber-card">
+                                    <div class="card-header"><h3><i class="fa-solid fa-gamepad"></i> Contrat de jeu d'Alexandre</h3><span class="badge-chip glow" id="reward-status">En attente</span></div>
+                                    <div class="playtime-hero-grid">
+                                        <div><span class="eyebrow-label">Solde disponible cette semaine</span><div class="playtime-total"><strong id="playtime-total">0</strong><span>minutes</span></div><p id="playtime-message">Ajoute une note d'école ou valide un devoir maison pour commencer.</p><div class="playtime-progress"><div id="playtime-progress-fill"></div></div><div class="playtime-progress-meta"><span>Objectif familial : <strong id="playtime-goal-label">60 min</strong></span><strong id="playtime-progress-label">0%</strong></div></div>
+                                        <div class="playtime-controller"><i class="fa-brands fa-playstation"></i><span>À jouer</span><strong id="playtime-clock">00:00</strong><button type="button" class="secondary-btn" id="reset-rewards-btn"><i class="fa-solid fa-rotate-left"></i> Nouvelle semaine</button></div>
+                                    </div>
+                                </div>
+                                <div class="reward-layout">
+                                    <div class="card cyber-card reward-rules-card"><div class="card-header"><h3><i class="fa-solid fa-scale-balanced"></i> Règles transparentes</h3><span class="badge-chip">1 point = 5 min</span></div><div class="reward-rules"><div class="reward-rule positive"><i class="fa-solid fa-arrow-up"></i><span><strong>+5 min</strong> par point au-dessus de la moyenne de classe</span></div><div class="reward-rule negative"><i class="fa-solid fa-arrow-down"></i><span><strong>-3 min</strong> par point en dessous de la moyenne</span></div><div class="reward-rule homework"><i class="fa-solid fa-house-chimney"></i><span><strong>+5 min</strong> par point au-dessus de 12/20 au devoir maison</span></div></div><p class="reward-note">Une note exactement égale à la moyenne rapporte 10 minutes. Le solde ne descend jamais sous zéro.</p></div>
+                                    <div class="card cyber-card reward-auto-card"><div class="card-header"><h3><i class="fa-solid fa-wand-magic-sparkles"></i> Gains automatiques</h3><span class="badge-chip glow">Activé</span></div><div class="auto-reward-status"><div class="auto-reward-icon"><i class="fa-solid fa-arrows-rotate"></i></div><div><strong>Le compteur se met à jour tout seul</strong><p>Enregistre une note dans le Carnet ou termine une session de devoir avec le Professeur. Le gain est ajouté après validation.</p></div></div><div id="reward-feedback" class="reward-feedback" aria-live="polite"></div></div>
+                                </div>
+                                <div class="card cyber-card reward-history-card"><div class="card-header"><h3><i class="fa-solid fa-clock-rotate-left"></i> Journal des gains</h3><span class="badge-chip" id="reward-history-count">0 action</span></div><div id="reward-history" class="reward-history"><p class="reward-empty">Aucune action enregistrée cette semaine.</p></div></div>
+                            </div>
+                        </section>
+
+            </div>
+        </main>
+
+        <!-- RIGHT SIDEBAR: INTELLIGENCE WIDGETS -->
+        <aside class="sidebar-right">
+            <!-- Recent Grades Pill Widget -->
+            <div class="widget-box stats-widget">
+                <div class="widget-header">
+                    <i class="fa-solid fa-file-lines"></i>
+                    <h3>Dernières Notes</h3>
+                </div>
+                <div id="recent-grades-list" class="recent-grades-container">
+                    <!-- Injected dynamically via script.js -->
+                    <div class="stat-item">
+                        <div class="stat-header">
+                            <span class="subject-label math-text">Maths</span>
+                            <span class="xp-val">16/20</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="fill math-bg" style="width: 80%"></div>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-header">
+                            <span class="subject-label french-text">Français</span>
+                            <span class="xp-val">14/20</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="fill french-bg" style="width: 70%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MAGIC DECODER / TRANSLATOR (shown for English / Italian) -->
+            <div id="translator-widget" class="widget-box translator-widget" style="display: none;">
+                <div class="widget-header">
+                    <i class="fa-solid fa-network-wired"></i>
+                    <h3>Décodeur Linguistique</h3>
+                </div>
+                <div class="translator-box">
+                    <textarea id="trans-input" placeholder="Texte ou mot à traduire..."></textarea>
+                    <div class="translator-controls">
+                        <select id="trans-lang">
+                            <option value="en|fr">🇬🇧 Anglais ➡️ 🇫🇷 Fr</option>
+                            <option value="fr|en">🇫🇷 Fr ➡️ 🇬🇧 Anglais</option>
+                            <option value="it|fr">🇮🇹 Italien ➡️ 🇫🇷 Fr</option>
+                            <option value="fr|it">🇫🇷 Fr ➡️ 🇮🇹 Italien</option>
+                        </select>
+                        <button id="trans-btn" title="Traduire immédiatement">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        </button>
+                    </div>
+                    <div id="trans-result" class="trans-result"></div>
+                </div>
+            </div>
+
+            <!-- WEEKLY SECURITY GOALS -->
+            <div class="widget-box goals-widget">
+                <div class="widget-header">
+                    <i class="fa-solid fa-list-check"></i>
+                    <h3>Missions Hebdo</h3>
+                </div>
+                <ul class="goals-list">
+                    <li class="done"><i class="fa-solid fa-circle-check"></i> 5 Leçons complétées</li>
+                    <li class="done"><i class="fa-solid fa-circle-check"></i> 100% au Quiz Maths</li>
+                    <li class="pending"><i class="fa-regular fa-circle"></i> S'entraîner 10min en Anglais</li>
+                    <li class="pending"><i class="fa-regular fa-circle"></i> Fiche Physique/Chimie</li>
+                </ul>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Chart.js doit être chargé avant le rendu des graphiques dans script.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Application Script -->
+    <script src="script.js"></script>
+</body>
+
+</html>
