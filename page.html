@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon AI Assistant 4ème - Céliane</title>
+    <!-- Inclure la nouvelle feuille de style dédiée à ce projet -->
+    <link rel="stylesheet" href="style2.css">
+    <!-- Font Awesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Configuration MathJax pour l'affichage mathématique -->
+    <script>
+      window.MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        }
+      };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- BARRE LATÉRALE -->
+    <aside class="sidebar">
+        <div class="profile">
+            <h1>Céliane</h1>
+            <p>Ton espace de révisions 4ème</p>
+        </div>
+
+        <div class="subject-tabs">
+            <button class="tab-btn active" data-subject="maths">
+                <i class="fa-solid fa-calculator" style="color: #a855f7;"></i>
+                Mathématiques
+            </button>
+            <button class="tab-btn" data-subject="francais">
+                <i class="fa-solid fa-book" style="color: #f472b6;"></i>
+                Français
+            </button>
+            <button class="tab-btn" data-subject="anglais">
+                <i class="fa-solid fa-language" style="color: #38bdf8;"></i>
+                Anglais
+            </button>
+        </div>
+
+        <div class="program-list">
+            <h3>Programme à réviser</h3>
+            <div class="topics" id="topics-container">
+                <!-- Les thèmes du programme seront injectés ici par JS selon la matière -->
+            </div>
+        </div>
+
+
+    </aside>
+
+    <!-- ZONE PRINCIPALE (CHAT) -->
+    <main class="main-content">
+        <header class="chat-header">
+            <div style="flex: 1;">
+                <h2 id="chat-title">Professeur de Mathématiques</h2>
+                <span style="font-size: 0.9rem; color: var(--text-light);">Je suis là pour t'aider avec tes exercices !</span>
+            </div>
+
+            <!-- Réglages audio déplacés -->
+            <div class="audio-settings" style="margin-right: 1.5rem; width: 160px; border-left: 1px solid var(--glass-border); padding-left: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <span style="font-size: 0.85rem; font-weight: 600; color: #64748b; display: flex; align-items: center; gap: 5px;">
+                        <button id="toggle-audio-btn" style="background:none; border:none; color: var(--primary-color); cursor:pointer; font-size: 1rem;" title="Désactiver l'audio">
+                            <i class="fa-solid fa-volume-high"></i>
+                        </button>
+                        Vitesse
+                    </span>
+                    <span id="speed-value" style="font-size: 0.8rem; font-weight: 700; color: #a855f7;">0.85x</span>
+                </div>
+                <input type="range" id="speed-slider" min="0.5" max="1.5" step="0.05" value="0.85" style="width: 100%; accent-color: #a855f7; cursor: pointer;">
+            </div>
+            <div class="subject-icon" id="chat-icon">
+                🧮
+            </div>
+        </header>
+
+        <div class="chat-box" id="chat-box">
+            <!-- Message de bienvenue -->
+            <div class="message bot">
+                <div class="message-content">
+                    Coucou Céliane ! Que veux-tu réviser en maths aujourd'hui ?
+                </div>
+                <div class="message-time">À l'instant</div>
+            </div>
+        </div>
+
+        <!-- Indicateur de frappe (caché par défaut) -->
+        <div class="chat-box" style="padding: 0 2rem; flex: 0; overflow: visible;">
+            <div class="typing-indicator" id="typing-indicator">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+
+        <footer class="chat-input-container">
+            <form id="chat-form" class="chat-input-wrapper">
+                <textarea id="user-input" placeholder="Pose ta question ou dicte ton texte..." required rows="2" style="background:transparent; border:none; outline:none; resize:none; flex:1; font-family:inherit; font-size:1.1rem; padding-top:10px;"></textarea>
+                <!-- Bouton Dictée -->
+                <button type="button" class="dictation-btn" id="dictation-btn" style="background:transparent; border:none; color:#64748b; font-size:1.2rem; cursor:pointer; margin-right:10px; transition:color 0.3s;" title="Parler (Dictée)">
+                    <i class="fa-solid fa-microphone"></i>
+                </button>
+                <button type="submit" class="send-btn" id="send-btn">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </form>
+        </footer>
+    </main>
+</div>
+
+<!-- Inclure le nouveau fichier JS -->
+<script src="script2.js"></script>
+</body>
+</html>
