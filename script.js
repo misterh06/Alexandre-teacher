@@ -149,35 +149,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const rewardFeedback = document.getElementById('reward-feedback');
 
-    function rewardForSchoolGrade(note, scale, classAverage, subject) {
-        const normalizedNote = (Number(note) / (Number(scale) || 20)) * 20;
-        const normalizedAverage = (Number(classAverage) / (Number(scale) || 20)) * 20;
-        const difference = normalizedNote - normalizedAverage;
-        const earnedMinutes = difference >= 0 ? 10 + difference * 5 : 10 + difference * 3;
-        const minutes = Math.max(0, earnedMinutes);
-        if (minutes > 0) {
-            addReward(minutes, 'school', `Note de ${subject}`, `${normalizedNote.toFixed(1)}/20 contre ${normalizedAverage.toFixed(1)}/20 pour la classe`);
-        }
-        if (rewardFeedback) {
-            rewardFeedback.innerHTML = minutes > 0
-                ? `<i class="fa-solid fa-circle-check"></i> Note enregistrée : <strong>+${Math.round(minutes)} minutes</strong> ajoutées automatiquement.`
-                : '<i class="fa-solid fa-circle-info"></i> Note enregistrée, mais aucun temps de jeu gagné pour cette note.';
-        }
-    }
-
-    function rewardForHomework(subject, grade) {
-        const note = typeof grade === 'string' ? parseFloat(grade.replace(',', '.')) : Number(grade);
-        const minutes = note > 12 ? Math.round((note - 12) * 5) : 0;
-        if (minutes > 0) {
-            addReward(minutes, 'homework', `Session ${subject}`, `${note}/20 • devoir maison terminé`);
-        }
-        if (rewardFeedback) {
-            rewardFeedback.innerHTML = minutes > 0
-                ? `<i class="fa-solid fa-circle-check"></i> Devoir terminé : <strong>+${minutes} minutes</strong> ajoutées automatiquement.`
-                : '<i class="fa-solid fa-circle-info"></i> Devoir terminé, mais la note est sous le seuil de 12/20 : aucun temps de jeu gagné.';
-        }
-    }
-
     function rebuildRewardsFromGrades(grades) {
         const currentWeek = getRewardWeekKey();
         const history = [];
@@ -203,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (grade.moyenne > 0) {
                     const difference = note - grade.normalizedAvg;
-                    const minutes = Math.max(0, Math.round(difference >= 0 ? 10 + difference * 5 : 10 + difference * 3));
+                    const minutes = Math.max(0, Math.round(difference * 5));
                     if (minutes > 0) {
                         history.push({
                             minutes,
@@ -1031,7 +1002,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 exchanges: exchanges,
                 appreciation: evaluationSpeechText
             });
-            rewardForHomework(itemSubject, note);
             if (evalSpeechBtn) {
                 evalSpeechBtn.classList.remove('speaking');
                 evalSpeechBtn.innerHTML = '<i class="fa-solid fa-play"></i> Play';
@@ -1530,9 +1500,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // 2. Send to N8N
             const success = await sendGradeToN8N(gradeData);
             if (success) {
-                if (classAverage !== '') {
-                    rewardForSchoolGrade(value, scale, classAverage, subject);
-                } else if (rewardFeedback) {
+                if (classAverage === '' && rewardFeedback) {
                     rewardFeedback.innerHTML = '<i class="fa-solid fa-circle-info"></i> Note enregistrée. Ajoute la moyenne de classe pour calculer le temps de jeu.';
                 }
                 alert('Protocole validé : Note synchronisée avec succès ! 🛡️');
