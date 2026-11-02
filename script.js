@@ -147,6 +147,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function getRewardSubmissionTimestamps() {
+        const submissionTimestamps = new Map();
+        rewardSubmissions.forEach(submission => {
+            const timestamps = submissionTimestamps.get(submission.signature) || [];
+            timestamps.push(submission.timestamp);
+            submissionTimestamps.set(submission.signature, timestamps);
+        });
+        return submissionTimestamps;
+    }
+
     function formatPlaytime(minutes) {
         const safeMinutes = Math.max(0, Math.round(minutes));
         return `${String(Math.floor(safeMinutes / 60)).padStart(2, '0')}:${String(safeMinutes % 60).padStart(2, '0')}`;
@@ -214,7 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function rebuildRewardsFromGrades(grades) {
         const currentWeek = getRewardWeekKey();
         const history = [];
-        const submissionTimestamps = new Map();
+        const submissionTimestamps = getRewardSubmissionTimestamps();
         const today = new Date();
         const previousSunday = new Date(today);
         previousSunday.setHours(0, 0, 0, 0);
@@ -237,12 +247,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 grade.hasSubmissionTimestamp = true;
             });
         }
-
-        rewardSubmissions.forEach(submission => {
-            const timestamps = submissionTimestamps.get(submission.signature) || [];
-            timestamps.push(submission.timestamp);
-            submissionTimestamps.set(submission.signature, timestamps);
-        });
 
         grades
             .filter(grade => {
@@ -2194,6 +2198,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
 
                 // Mise en mémoire cache complète
+                const submissionTimestamps = getRewardSubmissionTimestamps();
                 const remoteGrades = validGrades.map(g => {
                     const matiere = g.matière || g.subject || g.Matière || g.Subject || g["matière "] || 'Général';
                     const noteStr = g.note || g.grade || g.Note || g.Grade || g["note "] || g.valeur || "0";
