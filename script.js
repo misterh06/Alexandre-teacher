@@ -154,7 +154,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const history = [];
 
         grades
-            .filter(grade => grade.dateObj && !isNaN(grade.dateObj.getTime()) && getRewardWeekKey(grade.dateObj) === currentWeek)
+            .filter(grade => {
+                const rewardDate = grade.rewardDateObj || grade.dateObj;
+                return rewardDate && !isNaN(rewardDate.getTime()) && getRewardWeekKey(rewardDate) === currentWeek;
+            })
             .forEach(grade => {
                 const note = Number(grade.normalized20);
                 if (!Number.isFinite(note)) return;
@@ -2115,6 +2118,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const normalized20 = (rawNote / scale) * 20;
 
                     const dObj = parseDate(g.date || g.Date || g.timestamp || '');
+                    const rewardDateObj = parseDate(g.timestamp || g.created_at || g.createdAt || '');
                     let displayDate = (g.date || g.Date || g.timestamp || '');
                     if (!isNaN(dObj.getTime())) {
                         displayDate = dObj.toLocaleDateString('fr-FR');
@@ -2142,6 +2146,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         matière: matiere,
                         dateDisplay: displayDate || '?',
                         dateObj: dObj,
+                        rewardDateObj: isNaN(rewardDateObj.getTime()) ? dObj : rewardDateObj,
                         schoolYear: schoolYear,
                         note: rawNote,
                         barème: scale,
@@ -2164,6 +2169,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         matière: report.subject || 'Général',
                         dateDisplay: isNaN(reportDate.getTime()) ? '?' : reportDate.toLocaleDateString('fr-FR'),
                         dateObj: reportDate,
+                        rewardDateObj: reportDate,
                         schoolYear: getSchoolYearFromDate(reportDate),
                         note: grade,
                         barème: 20,
