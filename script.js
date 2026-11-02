@@ -34,7 +34,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedSchoolYear = 'all';
     let currentProgressionMode = 'monthly'; // 'monthly' | 'recent'
     let currentProgressionSubject = 'all';
-    const rewardGoalMinutes = 60;
     const rewardStorageKey = 'alexandre-playstation-rewards';
     const rewardSubmissionStorageKey = 'alexandre-playstation-submissions';
     let rewardState = loadRewardState();
@@ -73,17 +72,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 return cleanedState;
             };
-            if (saved && saved.week === getRewardWeekKey() && Array.isArray(saved.history)) return cleanState(saved);
-            if (saved && saved.day && getRewardWeekKey(new Date(`${saved.day}T12:00:00`)) === getRewardWeekKey() && Array.isArray(saved.history)) {
-                return cleanState({ week: getRewardWeekKey(), minutes: saved.minutes || 0, history: saved.history });
-            }
+            if (saved && Array.isArray(saved.history)) return cleanState(saved);
         } catch (error) {
             console.warn('Impossible de charger le contrat de jeu:', error);
         }
-        return { week: getRewardWeekKey(), minutes: 0, history: [] };
+        return { version: 2, minutes: 0, history: [], processedGradeKeys: [] };
     }
 
     function saveRewardState() {
+        rewardState.version = 2;
         localStorage.setItem(rewardStorageKey, JSON.stringify(rewardState));
     }
 
@@ -164,44 +161,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderRewardState() {
         const minutes = Math.max(0, Math.round(rewardState.minutes));
-        const percentage = Math.min(100, Math.round((minutes / rewardGoalMinutes) * 100));
         const total = document.getElementById('playtime-total');
         const clock = document.getElementById('playtime-clock');
-        const fill = document.getElementById('playtime-progress-fill');
-        const label = document.getElementById('playtime-progress-label');
         const message = document.getElementById('playtime-message');
         const status = document.getElementById('reward-status');
         const history = document.getElementById('reward-history');
         const count = document.getElementById('reward-history-count');
         const dashboardTotal = document.getElementById('dashboard-playtime');
-        const dashboardFill = document.getElementById('dashboard-playtime-fill');
         const dashboardLabel = document.getElementById('dashboard-playtime-label');
+        const earnedTotal = document.getElementById('playtime-earned-total');
+        const spentTotal = document.getElementById('playtime-spent-total');
+        const totalEarned = rewardState.history.reduce((total, item) => total + Math.max(0, Number(item.minutes) || 0), 0);
+        const totalSpent = rewardState.history.reduce((total, item) => (
+            total + (item.kind === 'playtime' ? Math.max(0, -(Number(item.minutes) || 0)) : 0)
+        ), 0);
 
         if (total) total.textContent = minutes;
         if (clock) clock.textContent = formatPlaytime(minutes);
-        if (fill) fill.style.width = `${percentage}%`;
-        if (label) label.textContent = `${percentage}%`;
         if (dashboardTotal) dashboardTotal.textContent = minutes;
-        if (dashboardFill) dashboardFill.style.width = `${percentage}%`;
-        if (dashboardLabel) dashboardLabel.textContent = `${minutes} / ${rewardGoalMinutes} min cette semaine`;
-        if (message) message.textContent = minutes >= rewardGoalMinutes
-            ? 'Objectif atteint. Le temps supplémentaire est un bonus mérité.'
-            : `Encore ${rewardGoalMinutes - minutes} min pour atteindre l'objectif de la semaine.`;
+        if (dashboardLabel) dashboardLabel.textContent = 'disponibles • report illimité';
+        if (earnedTotal) earnedTotal.textContent = totalEarned;
+        if (spentTotal) spentTotal.textContent = totalSpent;
+        if (message) message.textContent = minutes > 0
+            ? 'Ton crédit non utilisé est conservé sans limite de temps.'
+            : 'Ajoute une note récompensée pour commencer à cumuler du temps.';
         if (status) {
-            status.textContent = minutes >= rewardGoalMinutes ? 'Objectif atteint' : 'En construction';
-            status.classList.toggle('reward-complete', minutes >= rewardGoalMinutes);
+            status.textContent = minutes > 0 ? 'Crédit disponible' : 'En attente de gains';
+            status.classList.toggle('reward-complete', minutes > 0);
         }
         if (count) count.textContent = `${rewardState.history.length} action${rewardState.history.length > 1 ? 's' : ''}`;
         if (history) {
             history.innerHTML = rewardState.history.length === 0
-                ? '<p class="reward-empty">Aucune action enregistrée cette semaine.</p>'
+                ? '<p class="reward-empty">Aucun gain ou temps joué enregistré.</p>'
                 : rewardState.history.slice().reverse().map(item => `
                     <div class="reward-history-item">
-                        <span class="reward-history-icon ${item.kind}"><i class="fa-solid ${item.kind === 'homework' ? 'fa-house' : 'fa-school'}"></i></span>
-                        <div><strong>${escapeHtml(item.label)}</strong><small>${escapeHtml(item.detail)}</small></div>
-                        <b class="reward-history-minutes">+${item.minutes} min</b>
+                        <span class="reward-history-icon ${item.kind}"><i class="fa-solid ${item.kind === 'homework' ? 'fa-house' : item.kind === 'playtime' ? 'fa-gamepad' : 'fa-school'}"></i></span>
+                        <div><strong>${escapeHtml(item.label)}</strong><small>${escapeHtml(formatRewardDate(item.timestamp))} • ${escapeHtml(item.detail)}</small></div>
+                        <b class="reward-history-minutes ${item.minutes < 0 ? 'spent' : ''}">${item.minutes > 0 ? '+' : ''}${item.minutes} min</b>
                     </div>`).join('');
         }
+    }
+
+    function formatRewardDate(timestamp) {
+        const date = new Date(timestamp);
+        return Number.isNaN(date.getTime()) ? 'Historique' : date.toLocaleDateString('fr-FR');
     }
 
     function escapeHtml(value) {
@@ -209,12 +212,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function addReward(minutes, kind, label, detail) {
-        const safeMinutes = Math.max(0, Math.round(minutes));
-        rewardState.minutes += safeMinutes;
-        rewardState.history.push({ minutes: safeMinutes, kind, label, detail });
+        const requestedMinutes = Math.round(minutes);
+        const appliedMinutes = requestedMinutes < 0
+            ? -Math.min(rewardState.minutes, Math.abs(requestedMinutes))
+            : Math.max(0, requestedMinutes);
+        if (appliedMinutes === 0) return 0;
+
+        rewardState.minutes += appliedMinutes;
+        rewardState.history.push({
+            minutes: appliedMinutes,
+            kind,
+            label,
+            detail,
+            timestamp: new Date().toISOString()
+        });
         saveRewardState();
         renderRewardState();
-        return safeMinutes;
+        return appliedMinutes;
     }
 
     renderRewardState();
@@ -223,8 +237,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function rebuildRewardsFromGrades(grades) {
         const currentWeek = getRewardWeekKey();
-        const history = [];
         const submissionTimestamps = getRewardSubmissionTimestamps();
+        const processedGradeKeys = new Set(rewardState.processedGradeKeys || []);
+        const gradeOccurrences = new Map();
+        const matchedLegacyEntries = new Set();
+        const migratingLegacyState = Number(rewardState.version || 1) < 2;
         const today = new Date();
         const previousSunday = new Date(today);
         previousSunday.setHours(0, 0, 0, 0);
@@ -248,59 +265,102 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        grades
-            .filter(grade => {
-                const rewardDate = grade.rewardDateObj || grade.dateObj;
-                return rewardDate && !isNaN(rewardDate.getTime()) && getRewardWeekKey(rewardDate) === currentWeek;
-            })
-            .forEach(grade => {
-                const note = Number(grade.normalized20);
-                if (!Number.isFinite(note)) return;
+        grades.forEach(grade => {
+            const rewardDate = grade.rewardDateObj || grade.dateObj;
+            if (!rewardDate || Number.isNaN(rewardDate.getTime()) || getRewardWeekKey(rewardDate) !== currentWeek) return;
 
-                if (grade.entryType === 'maison') {
-                    const minutes = note > 12 ? Math.round((note - 12) * 5) : 0;
-                    if (minutes > 0) {
-                        history.push({
-                            minutes,
-                            kind: 'homework',
-                            label: `Session ${grade.matière}`,
-                            detail: `${note}/20 • devoir maison terminé`
-                        });
-                    }
-                    return;
-                }
+            const baseKey = grade.rewardSubmissionSignature || JSON.stringify([
+                grade.matière,
+                grade.dateObj?.toISOString?.() || '',
+                grade.normalized20,
+                grade.barème,
+                grade.entryType
+            ]);
+            const occurrence = (gradeOccurrences.get(baseKey) || 0) + 1;
+            gradeOccurrences.set(baseKey, occurrence);
+            const gradeKey = `${baseKey}#${occurrence}`;
+            if (processedGradeKeys.has(gradeKey)) return;
 
-                if (grade.moyenne > 0) {
-                    const difference = note - grade.normalizedAvg;
-                    const minutes = Math.max(0, Math.round(difference * 5));
-                    if (minutes > 0) {
-                        history.push({
-                            minutes,
-                            kind: 'school',
-                            label: `Note de ${grade.matière}`,
-                            detail: `${note.toFixed(1)}/20 contre ${grade.normalizedAvg.toFixed(1)}/20 pour la classe`
-                        });
-                    }
-                }
-            });
+            const reward = getGradeReward(grade);
+            if (!reward) return;
 
-        rewardState = {
-            week: currentWeek,
-            minutes: history.reduce((total, item) => total + item.minutes, 0),
-            history
-        };
+            const oldHistoryIndex = migratingLegacyState
+                ? rewardState.history.findIndex((item, index) => (
+                    !matchedLegacyEntries.has(index)
+                    && item.kind === reward.kind
+                    && item.label === reward.label
+                    && item.detail === reward.detail
+                ))
+                : -1;
+            if (oldHistoryIndex >= 0) {
+                matchedLegacyEntries.add(oldHistoryIndex);
+            }
+            processedGradeKeys.add(gradeKey);
+            rewardState.processedGradeKeys = [...processedGradeKeys];
+            if (oldHistoryIndex < 0) {
+                addReward(reward.minutes, reward.kind, reward.label, reward.detail);
+            }
+        });
+
+        rewardState.processedGradeKeys = [...processedGradeKeys];
         saveRewardState();
         renderRewardState();
     }
 
-    const resetRewardsButton = document.getElementById('reset-rewards-btn');
-    if (resetRewardsButton) {
-        resetRewardsButton.addEventListener('click', () => {
-            if (!confirm('Commencer une nouvelle semaine et remettre le compteur à zéro ?')) return;
-            rewardState = { week: getRewardWeekKey(), minutes: 0, history: [] };
-            saveRewardState();
-            renderRewardState();
-            if (rewardFeedback) rewardFeedback.textContent = 'Nouvelle semaine ouverte.';
+    function getGradeReward(grade) {
+        const note = Number(grade.normalized20);
+        if (!Number.isFinite(note)) return null;
+
+        if (grade.entryType === 'maison') {
+            const minutes = note > 12 ? Math.round((note - 12) * 5) : 0;
+            return minutes > 0 ? {
+                minutes,
+                kind: 'homework',
+                label: `Session ${grade.matière}`,
+                detail: `${note}/20 • devoir maison terminé`
+            } : null;
+        }
+
+        if (!(grade.normalizedAvg > 0)) return null;
+        const difference = note - grade.normalizedAvg;
+        if (Math.abs(difference) < 0.01) {
+            return {
+                minutes: 10,
+                kind: 'school',
+                label: `Note de ${grade.matière}`,
+                detail: `${note.toFixed(1)}/20 • moyenne de classe atteinte`
+            };
+        }
+
+        const minutes = difference > 0
+            ? Math.round(difference * 5)
+            : -Math.round(Math.abs(difference) * 3);
+        return minutes !== 0 ? {
+            minutes,
+            kind: 'school',
+            label: `Note de ${grade.matière}`,
+            detail: `${note.toFixed(1)}/20 contre ${grade.normalizedAvg.toFixed(1)}/20 pour la classe`
+        } : null;
+    }
+
+    const playtimeForm = document.getElementById('playtime-form');
+    if (playtimeForm) {
+        playtimeForm.addEventListener('submit', event => {
+            event.preventDefault();
+            const input = document.getElementById('playtime-used-input');
+            const minutes = Number(input?.value);
+            if (!Number.isInteger(minutes) || minutes < 1) {
+                if (rewardFeedback) rewardFeedback.textContent = 'Saisis un nombre de minutes supérieur à zéro.';
+                return;
+            }
+            if (minutes > rewardState.minutes) {
+                if (rewardFeedback) rewardFeedback.textContent = `Le temps joué dépasse le solde disponible de ${rewardState.minutes} min.`;
+                return;
+            }
+
+            addReward(-minutes, 'playtime', 'Temps de jeu utilisé', 'Temps joué');
+            playtimeForm.reset();
+            if (rewardFeedback) rewardFeedback.textContent = `${minutes} min déduites. Le crédit restant est conservé sans limite.`;
         });
     }
 

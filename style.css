@@ -2501,6 +2501,53 @@ body.theme-quantum .chart-mode-toggles {
     font-size: 0.75rem;
 }
 
+.reward-balance-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    color: var(--text-dim);
+    font-size: 0.82rem;
+}
+
+.reward-balance-summary strong {
+    color: var(--text-main);
+    font-family: var(--font-mono);
+}
+
+.playtime-use-form {
+    width: 100%;
+    margin-top: 8px;
+    text-align: left;
+}
+
+.playtime-use-form label {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+}
+
+.playtime-use-controls {
+    display: flex;
+    gap: 6px;
+}
+
+.playtime-use-controls input {
+    min-width: 0;
+    width: 80px;
+    padding: 7px 8px;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    background: var(--bg-input);
+    color: var(--text-main);
+    font: inherit;
+}
+
+.playtime-use-controls .secondary-btn {
+    margin: 0;
+    white-space: nowrap;
+}
+
 .reward-complete {
     color: var(--cyber-emerald) !important;
     border-color: var(--cyber-emerald) !important;
@@ -2661,6 +2708,7 @@ body.theme-quantum .chart-mode-toggles {
 .reward-history-icon.school { color: var(--cyber-cyan); background: var(--cyber-cyan-glow); }
 .reward-history-icon.homework { color: var(--cyber-amber); background: rgba(245, 158, 11, 0.14); }
 .reward-history-minutes { color: var(--cyber-emerald); font-family: var(--font-mono); white-space: nowrap; }
+.reward-history-minutes.spent { color: var(--cyber-amber); }
 .reward-empty { color: var(--text-dim); font-size: 0.86rem; padding: 10px 0; }
 
 .xp-showcase {
@@ -3047,6 +3095,17 @@ body.theme-quantum .chart-mode-toggles {
 @media (max-width: 1200px) {
     .app-container {
         grid-template-columns: 240px 1fr;
+    }
+
+    @media (max-width: 700px) {
+        .playtime-hero-grid,
+        .reward-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .playtime-use-controls input {
+            flex: 1;
+        }
     }
     .sidebar-right {
         display: none !important;
