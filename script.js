@@ -2068,6 +2068,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (typeof val === 'string') return parseFloat(val.replace(',', '.'));
                     return parseFloat(val);
                 };
+                const parseGradeWithScale = (value, fallbackScale) => {
+                    const fraction = String(value ?? '').trim().match(/^((?:\d+(?:[.,]\d*)?|[.,]\d+))\s*\/\s*((?:\d+(?:[.,]\d*)?|[.,]\d+))$/);
+                    if (!fraction) return { value: parseGrade(value), scale: fallbackScale };
+
+                    const fractionScale = parseGrade(fraction[2]);
+                    return {
+                        value: parseGrade(fraction[1]),
+                        scale: fractionScale > 0 ? fractionScale : fallbackScale
+                    };
+                };
+                const normalizeGrade = (value, scale) => {
+                    const parsedGrade = parseGradeWithScale(value, scale);
+                    return (parsedGrade.value / parsedGrade.scale) * 20;
+                };
 
                 const parseDate = (dateStr) => {
                     if (!dateStr) return new Date(NaN);
@@ -2088,14 +2102,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 const remoteGrades = validGrades.map(g => {
                     const matiere = g.matière || g.subject || g.Matière || g.Subject || g["matière "] || 'Général';
                     const noteStr = g.note || g.grade || g.Note || g.Grade || g["note "] || g.valeur || "0";
-                    const barèmeStr = g.barème || g.scale || g.Barème || g.Scale || g["barème "] || "20";
+                    const barèmeStr = g.barème || g.scale || g.Barème || g.Scale || g["barème "] || "";
                     const minStr = g["note la plus basse"] || g.min || g.Min || "";
                     const maxStr = g["note la plus haute"] || g.max || g.Max || "";
                     const avgStr = g.moyenne_classe || g.moyenne || g.avg || g.Moyenne || "";
                     const coef = parseGrade(g.coefficient || g.coef || g.Coefficient || 1) || 1;
 
-                    const rawNote = parseGrade(noteStr);
-                    const scale = parseGrade(barèmeStr) || 20;
+                    const configuredScale = parseGrade(barèmeStr);
+                    const parsedNote = parseGradeWithScale(noteStr, configuredScale || 20);
+                    const rawNote = parsedNote.value;
+                    const scale = parsedNote.scale || configuredScale || 20;
                     const normalized20 = (rawNote / scale) * 20;
 
                     const dObj = parseDate(g.date || g.Date || g.timestamp || '');
@@ -2133,9 +2149,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         min: parseGrade(minStr),
                         max: parseGrade(maxStr),
                         moyenne: parseGrade(avgStr),
-                        normalizedMin: (parseGrade(minStr) / scale) * 20,
-                        normalizedMax: (parseGrade(maxStr) / scale) * 20,
-                        normalizedAvg: (parseGrade(avgStr) / scale) * 20,
+                        normalizedMin: normalizeGrade(minStr, scale),
+                        normalizedMax: normalizeGrade(maxStr, scale),
+                        normalizedAvg: normalizeGrade(avgStr, scale),
                         commentaire: g.commentaire || g.title || g.Commentaire || '',
                         coefficient: coef,
                         entryType: entryType
