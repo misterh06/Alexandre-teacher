@@ -36,7 +36,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentProgressionSubject = 'all';
     const rewardGoalMinutes = 60;
     const rewardStorageKey = 'alexandre-playstation-rewards';
+    const rewardSubmissionStorageKey = 'alexandre-playstation-submissions';
     let rewardState = loadRewardState();
+    let rewardSubmissions = loadRewardSubmissions();
     const gradeForm = document.getElementById('grade-form');
     const gradesTbody = document.getElementById('grades-tbody');
     const recentGradesList = document.getElementById('recent-grades-list');
@@ -83,6 +85,66 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function saveRewardState() {
         localStorage.setItem(rewardStorageKey, JSON.stringify(rewardState));
+    }
+
+    function loadRewardSubmissions() {
+        try {
+            const saved = JSON.parse(localStorage.getItem(rewardSubmissionStorageKey) || '[]');
+            return Array.isArray(saved) ? saved : [];
+        } catch (error) {
+            console.warn('Impossible de charger les dates de saisie des notes:', error);
+            return [];
+        }
+    }
+
+    function getRewardSubmissionSignature(grade) {
+        const getFirstValue = values => values.find(value => value !== undefined && value !== null && value !== '');
+        const normalizeText = value => String(value || '')
+            .trim()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase();
+        const normalizeNumber = value => {
+            const parsed = Number.parseFloat(String(value ?? '').replace(',', '.'));
+            return Number.isFinite(parsed) ? String(parsed) : '';
+        };
+        const dateValue = getFirstValue([grade.date, grade.Date]) || '';
+        const dateText = String(dateValue).trim();
+        const isoDate = dateText.match(/^(\d{4})-(\d{2})-(\d{2})/);
+        const frenchDate = dateText.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+        const dateKey = isoDate
+            ? `${isoDate[1]}-${isoDate[2]}-${isoDate[3]}`
+            : frenchDate
+                ? `${frenchDate[3]}-${frenchDate[2].padStart(2, '0')}-${frenchDate[1].padStart(2, '0')}`
+                : dateText;
+        const note = getFirstValue([grade.note, grade.grade, grade.Note, grade.Grade, grade['note '], grade.valeur]) ?? '';
+        const fraction = String(note).trim().match(/^([0-9]+(?:[.,][0-9]+)?)\s*\/\s*([0-9]+(?:[.,][0-9]+)?)$/);
+        const scale = getFirstValue([grade.barème, grade.scale, grade.Barème, grade.Scale, grade['barème ']])
+            ?? (fraction ? fraction[2] : 20);
+        const average = getFirstValue([grade.moyenne_classe, grade.moyenne, grade.avg, grade.Moyenne]) ?? '';
+        const coefficient = getFirstValue([grade.coefficient, grade.coef, grade.Coefficient]) ?? 1;
+
+        return JSON.stringify([
+            normalizeText(getFirstValue([grade.matière, grade.subject, grade.Matière, grade.Subject, grade['matière ']])),
+            dateKey,
+            normalizeNumber(fraction ? fraction[1] : note),
+            normalizeNumber(scale),
+            normalizeNumber(average),
+            normalizeNumber(coefficient)
+        ]);
+    }
+
+    function recordRewardSubmission(grade) {
+        saveRewardSubmission(getRewardSubmissionSignature(grade), grade.timestamp);
+    }
+
+    function saveRewardSubmission(signature, timestamp) {
+        rewardSubmissions.push({ signature, timestamp });
+        try {
+            localStorage.setItem(rewardSubmissionStorageKey, JSON.stringify(rewardSubmissions));
+        } catch (error) {
+            console.error('Impossible de sauvegarder la date de saisie de la note:', error);
+        }
     }
 
     function formatPlaytime(minutes) {
@@ -152,6 +214,35 @@ document.addEventListener('DOMContentLoaded', () => {
     function rebuildRewardsFromGrades(grades) {
         const currentWeek = getRewardWeekKey();
         const history = [];
+        const submissionTimestamps = new Map();
+        const today = new Date();
+        const previousSunday = new Date(today);
+        previousSunday.setHours(0, 0, 0, 0);
+        previousSunday.setDate(previousSunday.getDate() - 1);
+
+        // Legacy rows may lack the submission timestamp; carry Sunday's grades into Monday once.
+        if (today.getDay() === 1) {
+            grades.forEach(grade => {
+                if (grade.hasSubmissionTimestamp || !grade.dateObj || grade.dateObj.toDateString() !== previousSunday.toDateString()) return;
+
+                const hasCurrentWeekSubmission = rewardSubmissions.some(submission => (
+                    submission.signature === grade.rewardSubmissionSignature
+                    && getRewardWeekKey(new Date(submission.timestamp)) === currentWeek
+                ));
+                if (hasCurrentWeekSubmission) return;
+
+                const timestamp = new Date().toISOString();
+                saveRewardSubmission(grade.rewardSubmissionSignature, timestamp);
+                grade.rewardDateObj = new Date(timestamp);
+                grade.hasSubmissionTimestamp = true;
+            });
+        }
+
+        rewardSubmissions.forEach(submission => {
+            const timestamps = submissionTimestamps.get(submission.signature) || [];
+            timestamps.push(submission.timestamp);
+            submissionTimestamps.set(submission.signature, timestamps);
+        });
 
         grades
             .filter(grade => {
@@ -1503,6 +1594,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // 2. Send to N8N
             const success = await sendGradeToN8N(gradeData);
             if (success) {
+                recordRewardSubmission(gradeData);
                 if (classAverage === '' && rewardFeedback) {
                     rewardFeedback.innerHTML = '<i class="fa-solid fa-circle-info"></i> Note enregistrée. Ajoute la moyenne de classe pour calculer le temps de jeu.';
                 }
@@ -2118,7 +2210,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     const normalized20 = (rawNote / scale) * 20;
 
                     const dObj = parseDate(g.date || g.Date || g.timestamp || '');
-                    const rewardDateObj = parseDate(g.timestamp || g.created_at || g.createdAt || '');
+                    const rewardSubmissionSignature = getRewardSubmissionSignature(g);
+                    const matchedSubmissionTimestamp = submissionTimestamps.get(rewardSubmissionSignature)?.shift();
+                    const serverSubmissionTimestamp = g.timestamp || g.created_at || g.createdAt || '';
+                    const rewardDateObj = parseDate(matchedSubmissionTimestamp || serverSubmissionTimestamp);
                     let displayDate = (g.date || g.Date || g.timestamp || '');
                     if (!isNaN(dObj.getTime())) {
                         displayDate = dObj.toLocaleDateString('fr-FR');
@@ -2147,6 +2242,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         dateDisplay: displayDate || '?',
                         dateObj: dObj,
                         rewardDateObj: isNaN(rewardDateObj.getTime()) ? dObj : rewardDateObj,
+                        hasSubmissionTimestamp: Boolean(matchedSubmissionTimestamp || serverSubmissionTimestamp),
+                        rewardSubmissionSignature,
                         schoolYear: schoolYear,
                         note: rawNote,
                         barème: scale,
@@ -2170,6 +2267,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         dateDisplay: isNaN(reportDate.getTime()) ? '?' : reportDate.toLocaleDateString('fr-FR'),
                         dateObj: reportDate,
                         rewardDateObj: reportDate,
+                        hasSubmissionTimestamp: true,
                         schoolYear: getSchoolYearFromDate(reportDate),
                         note: grade,
                         barème: 20,
