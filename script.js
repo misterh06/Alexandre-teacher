@@ -118,7 +118,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const fraction = String(note).trim().match(/^([0-9]+(?:[.,][0-9]+)?)\s*\/\s*([0-9]+(?:[.,][0-9]+)?)$/);
         const scale = getFirstValue([grade.barème, grade.scale, grade.Barème, grade.Scale, grade['barème ']])
             ?? (fraction ? fraction[2] : 20);
-        const average = getFirstValue([grade.moyenne_classe, grade.moyenne, grade.avg, grade.Moyenne]) ?? '';
         const coefficient = getFirstValue([grade.coefficient, grade.coef, grade.Coefficient]) ?? 1;
 
         return JSON.stringify([
@@ -126,9 +125,21 @@ document.addEventListener('DOMContentLoaded', () => {
             dateKey,
             normalizeNumber(fraction ? fraction[1] : note),
             normalizeNumber(scale),
-            normalizeNumber(average),
             normalizeNumber(coefficient)
         ]);
+    }
+
+    function getCanonicalProcessedGradeKey(key) {
+        const serializedSignature = String(key).replace(/#\d+$/, '');
+        try {
+            const signature = JSON.parse(serializedSignature);
+            if (Array.isArray(signature) && signature.length >= 6) {
+                return JSON.stringify([signature[0], signature[1], signature[2], signature[3], signature[5]]);
+            }
+            return JSON.stringify(signature);
+        } catch (error) {
+            return serializedSignature;
+        }
     }
 
     function recordRewardSubmission(grade) {
@@ -238,10 +249,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function rebuildRewardsFromGrades(grades) {
         const currentWeek = getRewardWeekKey();
         const submissionTimestamps = getRewardSubmissionTimestamps();
-        const processedGradeKeys = new Set(rewardState.processedGradeKeys || []);
-        const gradeOccurrences = new Map();
-        const matchedLegacyEntries = new Set();
-        const migratingLegacyState = Number(rewardState.version || 1) < 2;
+        const processedGradeKeys = new Set(
+            (rewardState.processedGradeKeys || []).map(getCanonicalProcessedGradeKey)
+        );
+        const seenGradeKeys = new Set();
+        const reconciledLegacyKeys = new Set();
+        const migratingLegacyState = Number(rewardState.version || 1) < 3;
         const today = new Date();
         const previousSunday = new Date(today);
         previousSunday.setHours(0, 0, 0, 0);
@@ -265,44 +278,63 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        if (migratingLegacyState) {
+            const previousKeyCounts = new Map();
+            (rewardState.processedGradeKeys || []).forEach(key => {
+                const canonicalKey = getCanonicalProcessedGradeKey(key);
+                previousKeyCounts.set(canonicalKey, (previousKeyCounts.get(canonicalKey) || 0) + 1);
+            });
+
+            grades.forEach(grade => {
+                const canonicalKey = getCanonicalProcessedGradeKey(grade.rewardSubmissionSignature);
+                if (reconciledLegacyKeys.has(canonicalKey)) return;
+                reconciledLegacyKeys.add(canonicalKey);
+                const duplicateCount = (previousKeyCounts.get(canonicalKey) || 0) - 1;
+                if (duplicateCount <= 0) return;
+
+                const reward = getGradeReward(grade);
+                if (!reward) return;
+
+                for (let duplicate = 0; duplicate < duplicateCount; duplicate++) {
+                    const noteLabel = `${Number(grade.normalized20).toFixed(1)}/20`;
+                    const historyIndex = rewardState.history.findIndex(item => (
+                        item.kind === reward.kind
+                        && item.label === reward.label
+                        && String(item.detail || '').includes(noteLabel)
+                    ));
+                    if (historyIndex < 0) break;
+
+                    const [duplicateReward] = rewardState.history.splice(historyIndex, 1);
+                    rewardState.minutes = Math.max(0, rewardState.minutes - Math.max(0, Number(duplicateReward.minutes) || 0));
+                }
+            });
+        }
+
         grades.forEach(grade => {
             const rewardDate = grade.rewardDateObj || grade.dateObj;
             if (!rewardDate || Number.isNaN(rewardDate.getTime()) || getRewardWeekKey(rewardDate) !== currentWeek) return;
 
-            const baseKey = grade.rewardSubmissionSignature || JSON.stringify([
+            const gradeKey = getCanonicalProcessedGradeKey(grade.rewardSubmissionSignature || JSON.stringify([
                 grade.matière,
                 grade.dateObj?.toISOString?.() || '',
                 grade.normalized20,
                 grade.barème,
-                grade.entryType
-            ]);
-            const occurrence = (gradeOccurrences.get(baseKey) || 0) + 1;
-            gradeOccurrences.set(baseKey, occurrence);
-            const gradeKey = `${baseKey}#${occurrence}`;
+                grade.coefficient
+            ]));
+            if (seenGradeKeys.has(gradeKey)) return;
+            seenGradeKeys.add(gradeKey);
             if (processedGradeKeys.has(gradeKey)) return;
 
             const reward = getGradeReward(grade);
             if (!reward) return;
 
-            const oldHistoryIndex = migratingLegacyState
-                ? rewardState.history.findIndex((item, index) => (
-                    !matchedLegacyEntries.has(index)
-                    && item.kind === reward.kind
-                    && item.label === reward.label
-                    && item.detail === reward.detail
-                ))
-                : -1;
-            if (oldHistoryIndex >= 0) {
-                matchedLegacyEntries.add(oldHistoryIndex);
-            }
             processedGradeKeys.add(gradeKey);
             rewardState.processedGradeKeys = [...processedGradeKeys];
-            if (oldHistoryIndex < 0) {
-                addReward(reward.minutes, reward.kind, reward.label, reward.detail);
-            }
+            addReward(reward.minutes, reward.kind, reward.label, reward.detail);
         });
 
         rewardState.processedGradeKeys = [...processedGradeKeys];
+        rewardState.version = 3;
         saveRewardState();
         renderRewardState();
     }
