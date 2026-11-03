@@ -166,12 +166,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function formatPlaytime(minutes) {
-        const safeMinutes = Math.max(0, Math.round(minutes));
-        return `${String(Math.floor(safeMinutes / 60)).padStart(2, '0')}:${String(safeMinutes % 60).padStart(2, '0')}`;
+        const roundedMinutes = Math.round(minutes);
+        const sign = roundedMinutes < 0 ? '-' : '';
+        const safeMinutes = Math.abs(roundedMinutes);
+        return `${sign}${String(Math.floor(safeMinutes / 60)).padStart(2, '0')}:${String(safeMinutes % 60).padStart(2, '0')}`;
     }
 
     function renderRewardState() {
-        const minutes = Math.max(0, Math.round(rewardState.minutes));
+        const minutes = Math.round(Number(rewardState.minutes) || 0);
         const total = document.getElementById('playtime-total');
         const clock = document.getElementById('playtime-clock');
         const message = document.getElementById('playtime-message');
@@ -193,12 +195,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dashboardLabel) dashboardLabel.textContent = 'disponibles • report illimité';
         if (earnedTotal) earnedTotal.textContent = totalEarned;
         if (spentTotal) spentTotal.textContent = totalSpent;
-        if (message) message.textContent = minutes > 0
-            ? 'Ton crédit non utilisé est conservé sans limite de temps.'
-            : 'Ajoute une note récompensée pour commencer à cumuler du temps.';
+        if (total?.parentElement) total.parentElement.classList.toggle('reward-debt', minutes < 0);
+        if (message) message.textContent = minutes < 0
+            ? `Il reste ${Math.abs(minutes)} min à compenser avec les prochains gains.`
+            : minutes > 0
+                ? 'Ton crédit non utilisé est conservé sans limite de temps.'
+                : 'Ajoute une note récompensée pour commencer à cumuler du temps.';
         if (status) {
-            status.textContent = minutes > 0 ? 'Crédit disponible' : 'En attente de gains';
+            status.textContent = minutes < 0
+                ? 'Temps à compenser'
+                : minutes > 0
+                    ? 'Crédit disponible'
+                    : 'En attente de gains';
             status.classList.toggle('reward-complete', minutes > 0);
+            status.classList.toggle('reward-debt', minutes < 0);
         }
         if (count) count.textContent = `${rewardState.history.length} action${rewardState.history.length > 1 ? 's' : ''}`;
         if (history) {
@@ -225,7 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function addReward(minutes, kind, label, detail) {
         const requestedMinutes = Math.round(minutes);
         const appliedMinutes = requestedMinutes < 0
-            ? -Math.min(rewardState.minutes, Math.abs(requestedMinutes))
+            ? requestedMinutes
             : Math.max(0, requestedMinutes);
         if (appliedMinutes === 0) return 0;
 
@@ -394,19 +404,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (feedback) feedback.textContent = 'Saisis un nombre de minutes supérieur à zéro.';
                 return;
             }
-            if (minutes > rewardState.minutes) {
-                if (feedback) feedback.textContent = `Solde insuffisant : il reste ${rewardState.minutes} min.`;
-                return;
-            }
-
             try {
                 const deductedMinutes = addReward(-minutes, 'playtime', 'Temps de jeu utilisé', 'Temps joué');
                 if (deductedMinutes === 0) {
-                    if (feedback) feedback.textContent = 'Aucun temps à déduire : le solde est à zéro.';
+                    if (feedback) feedback.textContent = 'Saisis un nombre de minutes supérieur à zéro.';
                     return;
                 }
                 playtimeForm.reset();
-                if (feedback) feedback.textContent = `${deductedMinutes} min déduites. Nouveau solde : ${rewardState.minutes} min.`;
+                const balanceMessage = rewardState.minutes < 0
+                    ? `Il reste ${Math.abs(rewardState.minutes)} min à compenser.`
+                    : `Nouveau solde : ${rewardState.minutes} min.`;
+                if (feedback) feedback.textContent = `${Math.abs(deductedMinutes)} min déduites. ${balanceMessage}`;
                 if (rewardFeedback) rewardFeedback.textContent = '';
             } catch (error) {
                 console.error('Impossible d’enregistrer le temps de jeu utilisé:', error);

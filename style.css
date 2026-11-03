@@ -2514,6 +2514,14 @@ body.theme-quantum .chart-mode-toggles {
     font-family: var(--font-mono);
 }
 
+.reward-debt {
+    color: var(--cyber-danger) !important;
+}
+
+.playtime-total.reward-debt strong {
+    color: var(--cyber-danger);
+}
+
 .playtime-use-form {
     width: 100%;
     margin-top: 8px;
