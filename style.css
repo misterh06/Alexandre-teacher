@@ -2527,6 +2527,14 @@ body.theme-quantum .chart-mode-toggles {
     font-size: 0.72rem;
 }
 
+.playtime-use-feedback {
+    min-height: 1.2em;
+    margin: 8px 0 0;
+    color: var(--cyber-emerald);
+    font-size: 0.72rem;
+    line-height: 1.4;
+}
+
 .playtime-use-controls {
     display: flex;
     gap: 6px;

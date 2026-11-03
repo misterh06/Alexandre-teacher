@@ -229,6 +229,8 @@ document.addEventListener('DOMContentLoaded', () => {
             : Math.max(0, requestedMinutes);
         if (appliedMinutes === 0) return 0;
 
+        const previousMinutes = rewardState.minutes;
+        const previousHistoryLength = rewardState.history.length;
         rewardState.minutes += appliedMinutes;
         rewardState.history.push({
             minutes: appliedMinutes,
@@ -237,7 +239,13 @@ document.addEventListener('DOMContentLoaded', () => {
             detail,
             timestamp: new Date().toISOString()
         });
-        saveRewardState();
+        try {
+            saveRewardState();
+        } catch (error) {
+            rewardState.minutes = previousMinutes;
+            rewardState.history.length = previousHistoryLength;
+            throw error;
+        }
         renderRewardState();
         return appliedMinutes;
     }
@@ -380,19 +388,30 @@ document.addEventListener('DOMContentLoaded', () => {
         playtimeForm.addEventListener('submit', event => {
             event.preventDefault();
             const input = document.getElementById('playtime-used-input');
+            const feedback = document.getElementById('playtime-use-feedback');
             const minutes = Number(input?.value);
             if (!Number.isInteger(minutes) || minutes < 1) {
-                if (rewardFeedback) rewardFeedback.textContent = 'Saisis un nombre de minutes supérieur à zéro.';
+                if (feedback) feedback.textContent = 'Saisis un nombre de minutes supérieur à zéro.';
                 return;
             }
             if (minutes > rewardState.minutes) {
-                if (rewardFeedback) rewardFeedback.textContent = `Le temps joué dépasse le solde disponible de ${rewardState.minutes} min.`;
+                if (feedback) feedback.textContent = `Solde insuffisant : il reste ${rewardState.minutes} min.`;
                 return;
             }
 
-            addReward(-minutes, 'playtime', 'Temps de jeu utilisé', 'Temps joué');
-            playtimeForm.reset();
-            if (rewardFeedback) rewardFeedback.textContent = `${minutes} min déduites. Le crédit restant est conservé sans limite.`;
+            try {
+                const deductedMinutes = addReward(-minutes, 'playtime', 'Temps de jeu utilisé', 'Temps joué');
+                if (deductedMinutes === 0) {
+                    if (feedback) feedback.textContent = 'Aucun temps à déduire : le solde est à zéro.';
+                    return;
+                }
+                playtimeForm.reset();
+                if (feedback) feedback.textContent = `${deductedMinutes} min déduites. Nouveau solde : ${rewardState.minutes} min.`;
+                if (rewardFeedback) rewardFeedback.textContent = '';
+            } catch (error) {
+                console.error('Impossible d’enregistrer le temps de jeu utilisé:', error);
+                if (feedback) feedback.textContent = 'Erreur : le débit n’a pas été enregistré. Réessaie.';
+            }
         });
     }
 
